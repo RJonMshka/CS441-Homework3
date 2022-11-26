@@ -5,9 +5,10 @@ import CloudOrg.Datacenters.StarNetworkDatacenter
 import CloudOrg.HelperUtils.CreateLogger
 import CloudOrg.Applications.MapReduceJob
 import CloudOrg.utils
-import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple
+import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicyBestFit, VmAllocationPolicyRandom, VmAllocationPolicyRoundRobin, VmAllocationPolicySimple}
 import org.cloudbus.cloudsim.brokers.DatacenterBrokerHeuristic
 import org.cloudbus.cloudsim.core.CloudSim
+import org.cloudbus.cloudsim.distributions.{ContinuousDistribution, UniformDistr}
 import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 
 import scala.util.Random
@@ -70,6 +71,10 @@ object StarTopologyMapReduceAppSimulation {
   val ram_upper_utilization_threshold = 0.8
   val ram_lower_utilization_threshold = 0.3
 
+  // datacenter allocation Policy
+  val allocationPolicyType = "SIMPLE"
+
+
 
   def main(args: Array[String]): Unit = {
 
@@ -78,7 +83,9 @@ object StarTopologyMapReduceAppSimulation {
     utils.setSimulatedAnnealingHeuristicForBroker(broker, initial_temperature, cold_temperature, cooling_rate, number_of_searches)
     val hostList = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
 
-    val datacenter = StarNetworkDatacenter(simulation, hostList, VmAllocationPolicySimple())
+    val allocationPolicy = utils.getAllocationPolicy(allocationPolicyType)
+    val datacenter = StarNetworkDatacenter(simulation, hostList, allocationPolicy)
+
     utils.setDatacenterCost(datacenter, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
     val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.SPACESHARED)

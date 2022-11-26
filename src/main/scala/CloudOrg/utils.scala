@@ -1,7 +1,7 @@
 package CloudOrg
 
 import CloudOrg.HelperUtils.CreateLogger
-import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicy
+import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicy, VmAllocationPolicyBestFit, VmAllocationPolicyRandom, VmAllocationPolicyRoundRobin, VmAllocationPolicySimple}
 import org.cloudbus.cloudsim.brokers.{DatacenterBroker, DatacenterBrokerHeuristic, DatacenterBrokerSimple}
 import org.cloudbus.cloudsim.cloudlets.network.{CloudletExecutionTask, CloudletReceiveTask, CloudletSendTask, NetworkCloudlet}
 import org.cloudbus.cloudsim.cloudlets.{Cloudlet, CloudletSimple}
@@ -35,8 +35,6 @@ object utils {
 
   val logger: Logger = CreateLogger(classOf[utils.type])
 
-  val hybrid_toplogies_count = 3
-
   val STATIC_POWER = 50
   val MAX_POWER = 200
 
@@ -45,8 +43,13 @@ object utils {
   val HOST_STARTUP_POWER = 10
   val HOST_SHUTDOWN_POWER = 5
 
+  val randomAllocationPolicySeed = 40
+
   enum SchedulerType:
     case TIMESHARED, SPACESHARED
+
+  enum AllocationPolicyType:
+    case SIMPLE, BESTFIT, RANDOM, ROUNDROBIN
 
   class RandomIntGenerator(minValue: Int, maxValue: Int, seed: Int):
     val random = UniformDistr(minValue, maxValue, seed)
@@ -175,9 +178,23 @@ object utils {
       cloudletUtilizationDynamic(cloudlet, cpuUtilization, ramUtilization, bwUtilization)
     }).toList.asJava
 
+  def createCloudletList(cloudletCount: Int, cloudletLength: Long, cloudletPes: Int, cloudletInputSize: Int, cloudletOutputInputSize: Int,  cpuUtilization: Double, ramUtilization: Double, bwUtilization: Double): util.List[Cloudlet] =
+    Range(0, cloudletCount).map(_ => {
+      val cloudlet = createCloudlet(cloudletLength, cloudletPes)
+      cloudletSetSize(cloudlet, cloudletInputSize, cloudletOutputInputSize)
+      cloudletUtilizationDynamic(cloudlet, cpuUtilization, ramUtilization, bwUtilization)
+    }).toList.asJava
+
   def createCloudletList(cloudletCount: Int, cloudletLength: Long, cloudletPes: Int, cpuUtilization: Double, initialRamUtilization: Double, maxRamUtilization: Double, bwUtilization: Double): util.List[Cloudlet] =
     Range(0, cloudletCount).map(_ => {
       val cloudlet = createCloudlet(cloudletLength, cloudletPes)
+      cloudletUtilizationDynamic(cloudlet, cpuUtilization, initialRamUtilization, maxRamUtilization, bwUtilization)
+    }).toList.asJava
+
+  def createCloudletList(cloudletCount: Int, cloudletLength: Long, cloudletPes: Int, cloudletInputSize: Int, cloudletOutputInputSize: Int, cpuUtilization: Double, initialRamUtilization: Double, maxRamUtilization: Double, bwUtilization: Double): util.List[Cloudlet] =
+    Range(0, cloudletCount).map(_ => {
+      val cloudlet = createCloudlet(cloudletLength, cloudletPes)
+      cloudletSetSize(cloudlet, cloudletInputSize, cloudletOutputInputSize)
       cloudletUtilizationDynamic(cloudlet, cpuUtilization, initialRamUtilization, maxRamUtilization, bwUtilization)
     }).toList.asJava
 
@@ -364,4 +381,15 @@ object utils {
     nwTopology.addLink(dc4, dc5, interDatacenterBw, interDatacenterLatency)
     nwTopology.addLink(dc5, dc1, interDatacenterBw, interDatacenterLatency)
     ()
+
+  def getAllocationPolicy(allocationPolicy: String): VmAllocationPolicy =
+    allocationPolicy match
+      case "SIMPLE" => VmAllocationPolicySimple()
+      case "RANDOM" => {
+        val random = UniformDistr(0, 1, randomAllocationPolicySeed)
+        VmAllocationPolicyRandom(random)
+      }
+      case "BESTFIT" => VmAllocationPolicyBestFit()
+      case "ROUNDROBIN" => VmAllocationPolicyRoundRobin()
+      case _ => VmAllocationPolicySimple()
 }
