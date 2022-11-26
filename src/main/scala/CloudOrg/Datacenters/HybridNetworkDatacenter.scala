@@ -9,5 +9,5 @@ import org.cloudbus.cloudsim.hosts.network.NetworkHost
 
 import java.util
 
-class HybridNetworkDatacenter(simulation: Simulation, hostList: util.List[? <: NetworkHost], vmAllocationPolicy: VmAllocationPolicy, treeSize: Int) extends NetworkDatacenter(simulation, hostList, vmAllocationPolicy):
+class HybridNetworkDatacenter(simulation: Simulation, hostList: util.List[? <: NetworkHost], vmAllocationPolicy: VmAllocationPolicy) extends NetworkDatacenter(simulation, hostList, vmAllocationPolicy):
   Topologies.createHybridNetworkTopologyInDatacenter(simulation.asInstanceOf[CloudSim], this, hostList)

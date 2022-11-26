@@ -1,24 +1,19 @@
-package CloudOrg.Simulations.StarTopologySimulations
+package CloudOrg.Simulations.RingTopologySimulations
 
-import CloudOrg.Brokers.TopologyAwareDatacenterBroker
-import CloudOrg.Datacenters.StarNetworkDatacenter
 import CloudOrg.Applications.ThreeTierApplication
 import CloudOrg.HelperUtils.CreateLogger
 import CloudOrg.utils
-import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicyRandom, VmAllocationPolicySimple}
-import org.cloudbus.cloudsim.brokers.{DatacenterBroker, DatacenterBrokerHeuristic}
+import CloudOrg.Datacenters.RingNetworkDatacenter
+import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple
+import org.cloudbus.cloudsim.brokers.DatacenterBrokerHeuristic
 import org.cloudbus.cloudsim.core.CloudSim
-import org.cloudbus.cloudsim.distributions.UniformDistr
-import org.cloudbus.cloudsim.vms.{Vm, VmCost}
-import org.cloudsimplus.autoscaling.HorizontalVmScalingSimple
 import org.cloudsimplus.builders.tables.CloudletsTableBuilder
-import org.cloudsimplus.heuristics.CloudletToVmMappingSimulatedAnnealing
 
 import scala.util.Random
 import scala.jdk.CollectionConverters.*
 
-object StarTopologyThreeTierComplexAppSimulation {
-  val logger = CreateLogger(classOf[StarTopologyThreeTierComplexAppSimulation.type])
+object RingTopologyThreeTierAppSimulation {
+  val logger = CreateLogger(classOf[RingTopologyThreeTierAppSimulation.type])
 
   val tree_count = 3
   val hosts_count = 9
@@ -83,7 +78,7 @@ object StarTopologyThreeTierComplexAppSimulation {
     utils.setSimulatedAnnealingHeuristicForBroker(broker, initial_temperature, cold_temperature, cooling_rate, number_of_searches)
     val hostList = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
 
-    val datacenter = StarNetworkDatacenter(simulation, hostList, VmAllocationPolicySimple())
+    val datacenter = RingNetworkDatacenter(simulation, hostList, VmAllocationPolicySimple())
     utils.setDatacenterCost(datacenter, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
     val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.TIMESHARED)
@@ -111,5 +106,4 @@ object StarTopologyThreeTierComplexAppSimulation {
     logger.info("<-------- RESOURCE BILLING INFORMATION ------------------>")
     utils.printTotalCostForVms(broker)
   }
-
 }

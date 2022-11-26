@@ -14,6 +14,7 @@ import org.cloudbus.cloudsim.hosts.{Host, HostSimple}
 import org.cloudbus.cloudsim.network.switches.{AggregateSwitch, EdgeSwitch, RootSwitch}
 import org.cloudbus.cloudsim.network.topologies.{BriteNetworkTopology, NetworkTopology}
 import org.cloudbus.cloudsim.power.models.PowerModelHostSimple
+import org.cloudbus.cloudsim.provisioners.ResourceProvisionerSimple
 import org.cloudbus.cloudsim.resources.{Pe, PeSimple, Ram}
 import org.cloudbus.cloudsim.schedulers.cloudlet.{CloudletSchedulerSpaceShared, CloudletSchedulerTimeShared}
 import org.cloudbus.cloudsim.utilizationmodels.{UtilizationModel, UtilizationModelDynamic, UtilizationModelFull}
@@ -101,6 +102,7 @@ object utils {
       setPowerModelForHost(host)
       setVmSchedulerForHost(host, vmScheduler)
       host.enableUtilizationStats
+      host.setRamProvisioner(ResourceProvisionerSimple()).setBwProvisioner(ResourceProvisionerSimple())
       host.setId(i)
       host
     }).toList.asJava
@@ -111,6 +113,7 @@ object utils {
       setPowerModelForHost(host)
       setVmSchedulerForHost(host, vmScheduler)
       host.enableUtilizationStats
+      host.setRamProvisioner(ResourceProvisionerSimple()).setBwProvisioner(ResourceProvisionerSimple())
       host.setId(i)
       host
     }).toList.asJava

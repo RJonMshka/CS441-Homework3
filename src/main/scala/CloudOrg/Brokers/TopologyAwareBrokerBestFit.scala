@@ -1,18 +1,21 @@
 package CloudOrg.Brokers
 
-import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
-import org.cloudbus.cloudsim.brokers.DatacenterBrokerHeuristic
+import CloudOrg.Datacenters.{HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
+import org.cloudbus.cloudsim.brokers.{DatacenterBrokerBestFit, DatacenterBrokerHeuristic}
 import org.cloudbus.cloudsim.cloudlets.Cloudlet
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudlet
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.datacenters.network.NetworkDatacenter
 import org.cloudbus.cloudsim.vms.Vm
 
-class TopologyAwareDatacenterBroker(simulation: CloudSim) extends DatacenterBrokerHeuristic(simulation):
+import java.util.Comparator
+import scala.jdk.CollectionConverters.*
+
+class TopologyAwareBrokerBestFit(simulation: CloudSim) extends DatacenterBrokerBestFit(simulation):
+
 
   private def findSuitableVmForCloudlet(cloudlet: Cloudlet, datacenterType: Class[? <: NetworkDatacenter]): Vm =
-    val heuristic = this.getHeuristic()
-    val vm = heuristic.getBestSolutionSoFar().getResult().getOrDefault(cloudlet, super.defaultVmMapper(cloudlet))
+    val vm = super.defaultVmMapper(cloudlet)
     vm.getHost.getDatacenter.getClass match
       case datacenterType => vm
       case _ => {
@@ -27,7 +30,7 @@ class TopologyAwareDatacenterBroker(simulation: CloudSim) extends DatacenterBrok
         if (c.getTasks.size == 2 || c.getTasks.size == 4) then
           findSuitableVmForCloudlet(c, classOf[TreeNetworkDatacenter])
         else if (c.getTasks.size == 3 || c.getTasks.size == 5) then
-        // three tier app tasks
+          // three tier app tasks
           findSuitableVmForCloudlet(c, classOf[RingNetworkDatacenter])
         else
           findSuitableVmForCloudlet(c, classOf[HybridNetworkDatacenter])
