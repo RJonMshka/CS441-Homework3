@@ -11,7 +11,7 @@ import org.cloudbus.cloudsim.datacenters.{Datacenter, DatacenterSimple}
 import org.cloudbus.cloudsim.distributions.UniformDistr
 import org.cloudbus.cloudsim.hosts.network.NetworkHost
 import org.cloudbus.cloudsim.hosts.{Host, HostSimple}
-import org.cloudbus.cloudsim.network.switches.{AggregateSwitch, EdgeSwitch}
+import org.cloudbus.cloudsim.network.switches.{AggregateSwitch, EdgeSwitch, RootSwitch}
 import org.cloudbus.cloudsim.network.topologies.{BriteNetworkTopology, NetworkTopology}
 import org.cloudbus.cloudsim.power.models.PowerModelHostSimple
 import org.cloudbus.cloudsim.resources.{Pe, PeSimple, Ram}
@@ -43,8 +43,6 @@ object utils {
   val HOST_SHUTDOWN_DELAY = 0
   val HOST_STARTUP_POWER = 10
   val HOST_SHUTDOWN_POWER = 5
-
-  val edge_switch_bw = 1.0
 
   enum SchedulerType:
     case TIMESHARED, SPACESHARED
@@ -80,105 +78,6 @@ object utils {
     val dc = NetworkDatacenter(simlulation, hostList, vmAllocationPolicy)
     dc.setSchedulingInterval(schedulingInterval)
     dc
-
-  def createStarNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
-    val edgeSwitch = EdgeSwitch(simulation, datacenter)
-    edgeSwitch.setDownlinkBandwidth(1)
-    edgeSwitch.setUplinkBandwidth(1)
-    datacenter.addSwitch(edgeSwitch)
-    hostList.asScala.map(
-      edgeSwitch.connectHost(_)
-    )
-    ()
-
-  def connectHosts(host1: NetworkHost, host2: NetworkHost, edgeSwitchList: immutable.List[EdgeSwitch], edgeSwitchIndex: Int): Unit =
-    edgeSwitchList(edgeSwitchIndex).connectHost(host1)
-    edgeSwitchList(edgeSwitchIndex).connectHost(host2)
-
-  def connectHosts(host: NetworkHost, edgeSwitchList: immutable.List[EdgeSwitch], edgeSwitchIndex: Int): Unit =
-    edgeSwitchList(edgeSwitchIndex).connectHost(host)
-
-  def applyEdgeSwitchesInLine(hostList: immutable.List[NetworkHost], edgeSwitchList: immutable.List[EdgeSwitch], edgeSwitchIndex: Int): Unit =
-    hostList match
-      case h1::h2::tail => {
-        connectHosts(h1, h2, edgeSwitchList, edgeSwitchIndex)
-        applyEdgeSwitchesInLine(h2::tail, edgeSwitchList, edgeSwitchIndex + 1)
-      }
-      case h::Nil => {
-        connectHosts(h, edgeSwitchList, edgeSwitchIndex)
-      }
-      case Nil => ()
-
-  def createRingNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
-    val edgeSwitchList = hostList.asScala.map(_ => {
-      setEdgeSwitch(simulation, datacenter)
-    }).toList
-    applyEdgeSwitchesInLine(hostList.asScala.toList, edgeSwitchList, 0)
-    if(edgeSwitchList.length > 1) then edgeSwitchList(edgeSwitchList.length - 1).connectHost(hostList.get(0))
-
-  def createBusNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
-    val edgeSwitchList = hostList.asScala.map(_ => {
-      setEdgeSwitch(simulation, datacenter)
-    }).toList
-    applyEdgeSwitchesInLine(hostList.asScala.toList, edgeSwitchList, 0)
-
-  def setEdgeSwitch(simulation: CloudSim, datacenter: NetworkDatacenter): EdgeSwitch =
-    val edgeSwitch = EdgeSwitch(simulation, datacenter)
-    edgeSwitch.setDownlinkBandwidth(edge_switch_bw)
-    edgeSwitch.setUplinkBandwidth(edge_switch_bw)
-    datacenter.addSwitch(edgeSwitch)
-    edgeSwitch
-
-  def createTreeNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost], treeSize: Int): Unit =
-    if(hostList.size % treeSize != 0) then
-      createStarNetworkTopologyInDatacenter(simulation, datacenter, hostList)
-    else
-      val treeNodes = hostList.size / treeSize
-      val hostNodesList = Range(0, treeNodes).map(i => {
-        hostList.subList(i * treeSize, (i + 1) * treeSize).asScala.toList
-      }).toList
-      val edgeSwitchList = hostNodesList.map(hList => {
-        setEdgeSwitch(simulation, datacenter)
-      })
-      val middleHostIndex = treeSize / 2
-      Range(0, hostNodesList.length).foreach(i => {
-        Range(0, hostNodesList(i).length).foreach(j => edgeSwitchList(i).connectHost(hostNodesList(i)(j)))
-        val leftIndex = (2 * i) + 1
-        val rightIndex = (2 * i) + 2
-        if(leftIndex < hostNodesList.length) then edgeSwitchList(i).connectHost(hostNodesList(leftIndex)(middleHostIndex))
-        if(rightIndex < hostNodesList.length) then edgeSwitchList(i).connectHost(hostNodesList(rightIndex)(middleHostIndex))
-      })
-
-  def createStarAndRingTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter,hostList: util.List[? <: NetworkHost]): Unit =
-    val firsHostList = hostList.subList(0, hostList.size / 2)
-    val otherHostList = hostList.subList(hostList.size / 2, hostList.size)
-    createStarNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, firsHostList)
-    createRingNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, otherHostList)
-    if(hostList.size > 0) then
-      val edgeSwitch = setEdgeSwitch(simulation, datacenter)
-      edgeSwitch.connectHost(firsHostList.get(0))
-      edgeSwitch.connectHost(otherHostList.get(0))
-
-  def createStarTreeAndRingTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter,hostList: util.List[? <: NetworkHost], treeSize: Int, maxSizeOfTreeNetwork: Int): Unit =
-    val hostListForTree = hostList.subList(0, maxSizeOfTreeNetwork)
-    val hostListForOther = hostList.subList(maxSizeOfTreeNetwork, hostList.size)
-    createTreeNetworkTopologyInDatacenter(simulation, datacenter, hostListForTree, treeSize)
-    createStarAndRingTopologyInDatacenter(simulation, datacenter, hostListForOther)
-    val edgeSwitch = setEdgeSwitch(simulation, datacenter)
-    edgeSwitch.connectHost(hostListForTree.get(0))
-    edgeSwitch.connectHost(hostListForOther.get(0))
-
-  def createHybridNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter,hostList: util.List[? <: NetworkHost], treeSize: Int): Unit =
-    val splitSize = hostList.size / hybrid_toplogies_count
-      if(splitSize <= treeSize) then
-      createStarAndRingTopologyInDatacenter(simulation, datacenter, hostList)
-    else
-      if(splitSize % treeSize == 0) then
-        createStarTreeAndRingTopologyInDatacenter(simulation, datacenter, hostList, treeSize, splitSize)
-      else
-        val sizeForTree = (treeSize - (splitSize % treeSize)) + splitSize
-        createStarTreeAndRingTopologyInDatacenter(simulation, datacenter, hostList, treeSize, sizeForTree)
-
 
   def createBroker(simulation: CloudSim): DatacenterBroker =
     DatacenterBrokerSimple(simulation)

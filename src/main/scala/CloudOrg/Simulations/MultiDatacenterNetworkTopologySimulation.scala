@@ -3,7 +3,7 @@ package CloudOrg.Simulations
 import CloudOrg.HelperUtils.CreateLogger
 import CloudOrg.Brokers.TopologyAwareDatacenterBroker
 import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
-import CloudOrg.Applications.{BroadcastMessageJob, MapReduceJob, ThreeTierApplication}
+import CloudOrg.Applications.{MapReduceJob, ThreeTierApplication}
 import CloudOrg.utils
 import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicyBestFit, VmAllocationPolicyRandom, VmAllocationPolicySimple}
 import org.cloudbus.cloudsim.brokers.DatacenterBroker
@@ -51,13 +51,6 @@ object MultiDatacenterNetworkTopologySimulation {
   val map_reduce_app_cloudlet_count = mapper_cloudlet_count + reducer_cloudlet_count
   val map_reduce_app_count = 20
   val map_reduce_cloudlet_count = map_reduce_app_count * map_reduce_app_cloudlet_count
-
-  // broadcast app
-  val sender_cloudlet_count = 1
-  val receiver_cloudlet_count = 20
-  val broadcast_app_cloudlet_count = sender_cloudlet_count + receiver_cloudlet_count
-  val broadcast_app_count = 5
-  val broadcast_cloudlet_count = broadcast_app_count * broadcast_app_cloudlet_count
 
   val cloudlet_pe_count = 1
   val cloudlet_length = 500
@@ -129,31 +122,21 @@ object MultiDatacenterNetworkTopologySimulation {
     })
     val simpleCloudletList = utils.createCloudletList(simple_cloudlet_count, cloudlet_length, cloudlet_pe_count, cloudlet_cpu_utilization, cloudlet_initial_ram_utilization, cloudlet_max_ram_utilization, cloudlet_bw_utilization)
     val totalNwCloudlets = map_reduce_cloudlet_count + client_server_cloudlet_count
-    println(simpleCloudletList.size())
-    println(totalNwCloudlets)
     val nwCloudletList = utils.createNwCloudletList(totalNwCloudlets, cloudlet_length, cloudlet_pe_count, vmList, cloudlet_cpu_utilization, cloudlet_initial_ram_utilization, cloudlet_max_ram_utilization, cloudlet_bw_utilization)
     val mapReduceCloudletList = Random.shuffle(nwCloudletList.subList(0, map_reduce_cloudlet_count).asScala.toList)
-   // val broadcastCloudletList = Random.shuffle(nwCloudletList.subList(map_reduce_cloudlet_count, map_reduce_cloudlet_count + broadcast_cloudlet_count).asScala.toList)
     val clientServerCloudletList = Random.shuffle(nwCloudletList.subList(map_reduce_cloudlet_count, totalNwCloudlets).asScala.toList)
-    println(mapReduceCloudletList.length)
-    //println(broadcastCloudletList.length)
-    println(clientServerCloudletList.length)
 
     Range(0, map_reduce_app_count).map(i => {
       MapReduceJob.createMapReduceTasks(mapReduceCloudletList(map_reduce_app_cloudlet_count * i), mapReduceCloudletList((map_reduce_app_cloudlet_count * i) + 1), mapReduceCloudletList((map_reduce_app_cloudlet_count * i) + 2), mapReduceCloudletList((map_reduce_app_cloudlet_count * i) + 3))
     })
 
-//    Range(0, broadcast_app_count).map(i => {
-//      BroadcastMessageJob.createBroadcastMessageTasks(broadcastCloudletList(broadcast_app_cloudlet_count * i), broadcastCloudletList.asJava.subList((broadcast_app_cloudlet_count * i) + 1, ((broadcast_app_cloudlet_count * i) + 1) + receiver_cloudlet_count) )
-//    })
-
     Range(0, client_server_app_count).map(i => {
       ThreeTierApplication.createAppWorkFlow(clientServerCloudletList(client_server_task_cloudlets_count * i), clientServerCloudletList((client_server_task_cloudlets_count * i) + 1), clientServerCloudletList((client_server_task_cloudlets_count * i) + 2))
     })
 
+    // concat all cloudlet list
     val newCloudletList = simpleCloudletList.asScala.concat(mapReduceCloudletList).concat(clientServerCloudletList)
-    
-    // map reduce
+
     broker.submitVmList(vmList)
     broker.submitCloudletList(newCloudletList.toList.asJava)
 

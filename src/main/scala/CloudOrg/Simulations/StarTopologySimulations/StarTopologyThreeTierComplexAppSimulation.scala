@@ -36,10 +36,10 @@ object StarTopologyThreeTierComplexAppSimulation {
 
   val client_cloudlet_task_count = 1
   val server_cloudlet_task_count = 2
-  val app_cloudlet_tasks_count = client_cloudlet_task_count + server_cloudlet_task_count
+  val app_cloudlet_count = client_cloudlet_task_count + server_cloudlet_task_count
 
-  val app_cloutlet_count = 50
-  val cloudlet_count = app_cloudlet_tasks_count * app_cloutlet_count
+  val app_count = 40
+  val cloudlet_count = app_count * app_cloudlet_count
   val cloudlet_pe_count = 1
   val cloudlet_length = 1000
   val cloudlet_file_size = 200
@@ -82,22 +82,20 @@ object StarTopologyThreeTierComplexAppSimulation {
     val broker = DatacenterBrokerHeuristic(simulation)
     utils.setSimulatedAnnealingHeuristicForBroker(broker, initial_temperature, cold_temperature, cooling_rate, number_of_searches)
     val hostList = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-
-    //val datacenter = utils.createNwDataCenter(simulation, hostList, 1.0)
+    
     val datacenter = StarNetworkDatacenter(simulation, hostList, VmAllocationPolicySimple())
     utils.setDatacenterCost(datacenter, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
-    val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.TIMESHARED)
+    val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.SPACESHARED)
     vmList.asScala.foreach(vm => {
-      utils.createHorizontalVmScaling(vm, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.TIMESHARED, cpu_overload_threshold)
+      utils.createHorizontalVmScaling(vm, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.SPACESHARED, cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, ram_scaling_factor, ram_upper_utilization_threshold, ram_lower_utilization_threshold)
     })
     val cloudletList = utils.createNwCloudletList(cloudlet_count, cloudlet_length, cloudlet_pe_count, vmList, cloudlet_cpu_utilization, cloudlet_initial_ram_utilization, cloudlet_max_ram_utilization, cloudlet_bw_utilization)
-    val clientCloudlets = cloudletList.subList(0, app_cloutlet_count).asScala.toList
-    val otherCloudlets = Random.shuffle(cloudletList.subList(app_cloutlet_count, cloudletList.size).asScala.toList)
+    val randomCloudlets = Random.shuffle(cloudletList.asScala.toList)
 
-    Range(0, clientCloudlets.length).map(i => {
-      ThreeTierApplication.createAppWorkFlow(clientCloudlets(i), otherCloudlets(server_cloudlet_task_count * i), otherCloudlets((server_cloudlet_task_count * i) + 1))
+    Range(0, app_count).map(i => {
+      ThreeTierApplication.createAppWorkFlow(randomCloudlets(app_cloudlet_count * i), randomCloudlets((app_cloudlet_count * i) + 1), randomCloudlets((app_cloudlet_count * i) + 2))
     })
     broker.submitVmList(vmList)
     broker.submitCloudletList(cloudletList)
