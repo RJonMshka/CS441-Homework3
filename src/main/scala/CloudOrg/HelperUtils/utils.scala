@@ -34,8 +34,8 @@ object utils {
 
   val logger: Logger = CreateLogger(classOf[utils.type])
 
-  val STATIC_POWER = 50
-  val MAX_POWER = 200
+  val STATIC_POWER = 20
+  val MAX_POWER = 100
 
   val HOST_STARTUP_DELAY = 0
   val HOST_SHUTDOWN_DELAY = 0
@@ -380,8 +380,6 @@ object utils {
     schedulingPolicy match
       case "TIMESHARED" => CloudletSchedulerTimeShared()
       case "SPACESHARED" => CloudletSchedulerSpaceShared()
-      case "RANDOM" => CloudletSchedulerSpaceShared()
-      case "PSEUDORANDOM" => CloudletSchedulerSpaceShared()
       case "FAIR" => CloudletSchedulerCompletelyFair()
       case _ => CloudletSchedulerSpaceShared()
 
