@@ -65,7 +65,7 @@ object CommonTopologySimpleCloudletSimulation {
   // datacenter allocation Policy
   val allocationPolicyType = "SIMPLE"
   // vm scheduling policy
-  val vmSchedulerType = "TIMESHARED"
+  val vmSchedulerType = "RANDOM"
   // cloudlet scheduling policy
   val cloudletSchedulerType = "SPACESHARED"
 

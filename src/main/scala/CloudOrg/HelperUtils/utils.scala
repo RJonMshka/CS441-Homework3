@@ -24,6 +24,7 @@ import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 import org.cloudsimplus.heuristics.CloudletToVmMappingSimulatedAnnealing
 import org.slf4j.Logger
 import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
+import CloudOrg.Schedulers.Vm.{VmSchedulerPseudoRandom, VmSchedulerRandom}
 
 import java.util
 import java.util.function.{Predicate, Supplier}
@@ -42,6 +43,9 @@ object utils {
   val HOST_SHUTDOWN_POWER = 5
 
   val randomAllocationPolicySeed = 40
+
+  val vmChance = 0.9
+  val vmMigrationOverhead = 0.1
 
   enum NetworkDatacenterType:
     case STAR, TREE, RING, BUS, HYBRID, NORMAL
@@ -368,9 +372,9 @@ object utils {
     schedulingPolicy match
       case "TIMESHARED" => VmSchedulerTimeShared()
       case "SPACESHARED" => VmSchedulerSpaceShared()
-      case "RANDOM" => VmSchedulerSpaceShared()
-      case "PSEUDORANDOM" => VmSchedulerSpaceShared()
-      case _ => VmSchedulerSpaceShared()
+      case "RANDOM" => VmSchedulerRandom(vmMigrationOverhead)
+      case "PSEUDORANDOM" => VmSchedulerPseudoRandom(vmChance, vmMigrationOverhead)
+      case _ => VmSchedulerTimeShared()
 
   def getCloudletSchedulingPolicy(schedulingPolicy: String): CloudletScheduler =
     schedulingPolicy match
