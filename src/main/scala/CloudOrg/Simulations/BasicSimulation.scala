@@ -1,10 +1,10 @@
 package CloudOrg.Simulations
 
-import CloudOrg.HelperUtils.CreateLogger
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import org.cloudbus.cloudsim.brokers.DatacenterBroker
 import org.cloudbus.cloudsim.core.CloudSim
+import org.cloudbus.cloudsim.datacenters.DatacenterSimple
 import org.cloudbus.cloudsim.hosts.HostSimple
-import CloudOrg.utils
 import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 
 object BasicSimulation {
@@ -30,7 +30,7 @@ object BasicSimulation {
     val simulation:CloudSim = CloudSim()
     val broker: DatacenterBroker = utils.createBroker(simulation)
     val hostList = utils.createHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    utils.createDataCenter(simulation, hostList)
+    DatacenterSimple(simulation, hostList)
     val vmList = utils.createVmList(vm_count, host_mips, vm_pe_count)
     val cloudletList = utils.createCloudletList(cloudlet_count, cloudlet_length, cloudlet_pe_count)
 

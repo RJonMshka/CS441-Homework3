@@ -1,7 +1,6 @@
-package CloudOrg
+package CloudOrg.HelperUtils
 
-import CloudOrg.HelperUtils.CreateLogger
-import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicy, VmAllocationPolicyBestFit, VmAllocationPolicyRandom, VmAllocationPolicyRoundRobin, VmAllocationPolicySimple}
+import org.cloudbus.cloudsim.allocationpolicies.*
 import org.cloudbus.cloudsim.brokers.{DatacenterBroker, DatacenterBrokerHeuristic, DatacenterBrokerSimple}
 import org.cloudbus.cloudsim.cloudlets.network.{CloudletExecutionTask, CloudletReceiveTask, CloudletSendTask, NetworkCloudlet}
 import org.cloudbus.cloudsim.cloudlets.{Cloudlet, CloudletSimple}
@@ -11,25 +10,23 @@ import org.cloudbus.cloudsim.datacenters.{Datacenter, DatacenterSimple}
 import org.cloudbus.cloudsim.distributions.UniformDistr
 import org.cloudbus.cloudsim.hosts.network.NetworkHost
 import org.cloudbus.cloudsim.hosts.{Host, HostSimple}
-import org.cloudbus.cloudsim.network.switches.{AggregateSwitch, EdgeSwitch, RootSwitch}
-import org.cloudbus.cloudsim.network.topologies.{BriteNetworkTopology, NetworkTopology}
+import org.cloudbus.cloudsim.network.topologies.BriteNetworkTopology
 import org.cloudbus.cloudsim.power.models.PowerModelHostSimple
 import org.cloudbus.cloudsim.provisioners.ResourceProvisionerSimple
 import org.cloudbus.cloudsim.resources.{Pe, PeSimple, Ram}
 import org.cloudbus.cloudsim.schedulers.cloudlet.{CloudletSchedulerSpaceShared, CloudletSchedulerTimeShared}
-import org.cloudbus.cloudsim.utilizationmodels.{UtilizationModel, UtilizationModelDynamic, UtilizationModelFull}
+import org.cloudbus.cloudsim.schedulers.vm.{VmSchedulerSpaceShared, VmSchedulerTimeShared}
+import org.cloudbus.cloudsim.utilizationmodels.{UtilizationModelDynamic, UtilizationModelFull}
 import org.cloudbus.cloudsim.vms.network.NetworkVm
 import org.cloudbus.cloudsim.vms.{Vm, VmCost, VmSimple}
-import org.cloudbus.cloudsim.schedulers.vm.{VmScheduler, VmSchedulerSpaceShared, VmSchedulerTimeShared}
 import org.cloudsimplus.autoscaling.{HorizontalVmScalingSimple, VerticalVmScalingSimple}
 import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 import org.cloudsimplus.heuristics.CloudletToVmMappingSimulatedAnnealing
 import org.slf4j.Logger
+import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
 
 import java.util
-import java.util.*
 import java.util.function.{Predicate, Supplier}
-import scala.collection.*
 import scala.jdk.CollectionConverters.*
 
 object utils {
@@ -52,37 +49,23 @@ object utils {
   enum AllocationPolicyType:
     case SIMPLE, BESTFIT, RANDOM, ROUNDROBIN
 
+  enum NetworkDatacenterType:
+    case STAR, TREE, RING, BUS, HYBRID, NORMAL
+
   class RandomIntGenerator(minValue: Int, maxValue: Int, seed: Int):
     val random = UniformDistr(minValue, maxValue, seed)
 
     def getNextRandomValue(): Double =
       random.sample()
 
-  def createDataCenter(simlulation: CloudSim, hostList: util.List[Host], vmAllocationPolicy: VmAllocationPolicy, schedulingInterval: Double): Datacenter =
-    val datacenter = DatacenterSimple(simlulation, hostList, vmAllocationPolicy)
-    datacenter.setSchedulingInterval(schedulingInterval)
-    datacenter
-
-  def createDataCenter(simlulation: CloudSim, hostList: util.ArrayList[Host], schedulingInterval: Double): Datacenter =
-    val datacenter = DatacenterSimple(simlulation, hostList)
-    datacenter.setSchedulingInterval(schedulingInterval)
-    datacenter
-
-  def createDataCenter(simlulation: CloudSim, hostList: util.List[Host], vmAllocationPolicy: VmAllocationPolicy): Datacenter = DatacenterSimple(simlulation, hostList, vmAllocationPolicy)
-
-  def createDataCenter(simlulation: CloudSim, hostList: util.List[Host]): Datacenter = DatacenterSimple(simlulation, hostList)
-
-  def createNwDataCenter(simlulation: CloudSim, hostList: util.List[NetworkHost]): NetworkDatacenter = NetworkDatacenter(simlulation, hostList)
-
-  def createNwDataCenter(simlulation: CloudSim, hostList: util.List[NetworkHost], schedulingInterval: Double): NetworkDatacenter =
-    val dc = NetworkDatacenter(simlulation, hostList)
-    dc.setSchedulingInterval(schedulingInterval)
-    dc
-
-  def createNwDataCenter(simlulation: CloudSim, hostList: util.List[NetworkHost], vmAllocationPolicy: VmAllocationPolicy, schedulingInterval: Double): NetworkDatacenter =
-    val dc = NetworkDatacenter(simlulation, hostList, vmAllocationPolicy)
-    dc.setSchedulingInterval(schedulingInterval)
-    dc
+  def createNwDatacenter(nwDatacenterType: NetworkDatacenterType, simulation: CloudSim, hostList: util.List[NetworkHost], vmAllocationPolicy: VmAllocationPolicy, treeSize: Int): NetworkDatacenter =
+    nwDatacenterType match
+      case NetworkDatacenterType.STAR => StarNetworkDatacenter(simulation, hostList, vmAllocationPolicy)
+      case NetworkDatacenterType.RING => RingNetworkDatacenter(simulation, hostList, vmAllocationPolicy)
+      case NetworkDatacenterType.BUS => BusNetworkDatacenter(simulation, hostList, vmAllocationPolicy)
+      case NetworkDatacenterType.TREE => TreeNetworkDatacenter(simulation, hostList, vmAllocationPolicy, treeSize)
+      case NetworkDatacenterType.HYBRID => HybridNetworkDatacenter(simulation, hostList, vmAllocationPolicy)
+      case NetworkDatacenterType.NORMAL => NetworkDatacenter(simulation, hostList, vmAllocationPolicy)
 
   def createBroker(simulation: CloudSim): DatacenterBroker =
     DatacenterBrokerSimple(simulation)
@@ -141,7 +124,7 @@ object utils {
     setVmCharacteristics(vm, vmRam, vmBw, vmSize, cloudletScheduler)
     vm
 
-  def createNwVm( mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): NetworkVm =
+  def createNwVm(mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): NetworkVm =
     val vm = NetworkVm(mipsCapacity, peCount)
     setVmCharacteristics(vm, vmRam, vmBw, vmSize, cloudletScheduler)
     vm
@@ -179,7 +162,7 @@ object utils {
       cloudletUtilizationDynamic(cloudlet, cpuUtilization, ramUtilization, bwUtilization)
     }).toList.asJava
 
-  def createCloudletList(cloudletCount: Int, cloudletLength: Long, cloudletPes: Int, cloudletInputSize: Int, cloudletOutputInputSize: Int,  cpuUtilization: Double, ramUtilization: Double, bwUtilization: Double): util.List[Cloudlet] =
+  def createCloudletList(cloudletCount: Int, cloudletLength: Long, cloudletPes: Int, cloudletInputSize: Int, cloudletOutputInputSize: Int, cpuUtilization: Double, ramUtilization: Double, bwUtilization: Double): util.List[Cloudlet] =
     Range(0, cloudletCount).map(_ => {
       val cloudlet = createCloudlet(cloudletLength, cloudletPes)
       cloudletSetSize(cloudlet, cloudletInputSize, cloudletOutputInputSize)
@@ -329,11 +312,11 @@ object utils {
 
   def createHorizontalVmScaling(vm: Vm, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType, overloadingThreshold: Double): Unit =
     val horizontalVmScaling = HorizontalVmScalingSimple()
-    val createVm = new Supplier[Vm]:
+    val createVm = new Supplier[Vm] :
       override def get(): Vm = vm match
         case v: NetworkVm => utils.createNwVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)
         case _ => utils.createVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)
-    val predicate = new Predicate[Vm]:
+    val predicate = new Predicate[Vm] :
       override def test(t: Vm): Boolean = horizontalVmScalingOutPredicate(t, overloadingThreshold)
     horizontalVmScaling.setVmSupplier(createVm).setOverloadPredicate(predicate)
     vm.setHorizontalScaling(horizontalVmScaling)
@@ -346,7 +329,7 @@ object utils {
     vm.setRamVerticalScaling(verticalRamScaling)
     ()
 
-      
+
   def printTotalCostForVms(broker: DatacenterBroker): Unit =
     val (processingCost, memCost, storageCost, bwCost, totalCost, totalNonIdleVms) = broker.getVmCreatedList.asScala.foldLeft((0.0, 0.0, 0.0, 0.0, 0.0, 0.0))((x, y) => {
       val vm = y.asInstanceOf[Vm]

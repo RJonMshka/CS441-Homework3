@@ -1,6 +1,6 @@
 package CloudOrg.Applications
 
-import CloudOrg.utils
+import CloudOrg.HelperUtils.utils
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudlet
 
 object ThreeTierApplication {

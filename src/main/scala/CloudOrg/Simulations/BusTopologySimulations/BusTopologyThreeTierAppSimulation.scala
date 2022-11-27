@@ -2,8 +2,7 @@ package CloudOrg.Simulations.BusTopologySimulations
 
 import CloudOrg.Datacenters.BusNetworkDatacenter
 import CloudOrg.Applications.ThreeTierApplication
-import CloudOrg.HelperUtils.CreateLogger
-import CloudOrg.utils
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple
 import org.cloudbus.cloudsim.brokers.DatacenterBrokerHeuristic
 import org.cloudbus.cloudsim.core.CloudSim

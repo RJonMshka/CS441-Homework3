@@ -1,6 +1,6 @@
 package CloudOrg.Datacenters
 
-import CloudOrg.utils
+import CloudOrg.HelperUtils.utils
 import CloudOrg.Network.Topologies
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicy
 import org.cloudbus.cloudsim.core.{CloudSim, Simulation}

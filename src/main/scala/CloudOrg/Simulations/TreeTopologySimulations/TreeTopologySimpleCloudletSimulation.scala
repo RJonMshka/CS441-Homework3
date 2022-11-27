@@ -1,7 +1,6 @@
 package CloudOrg.Simulations.TreeTopologySimulations
 
-import CloudOrg.HelperUtils.CreateLogger
-import CloudOrg.utils
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import CloudOrg.Datacenters.TreeNetworkDatacenter
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple
 import org.cloudbus.cloudsim.brokers.DatacenterBrokerHeuristic

@@ -1,10 +1,9 @@
 package CloudOrg.Simulations
 
-import CloudOrg.HelperUtils.CreateLogger
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import CloudOrg.Brokers.{TopologyAwareBrokerBestFit, TopologyAwareDatacenterBroker}
 import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
 import CloudOrg.Applications.{MapReduceJob, ThreeTierApplication}
-import CloudOrg.utils
 import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicyBestFit, VmAllocationPolicyRandom, VmAllocationPolicySimple}
 import org.cloudbus.cloudsim.brokers.{DatacenterBroker, DatacenterBrokerSimple}
 import org.cloudbus.cloudsim.core.CloudSim

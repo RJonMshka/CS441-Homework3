@@ -1,7 +1,6 @@
 package CloudOrg.Datacenters
 
-import CloudOrg.utils
-
+import CloudOrg.HelperUtils.utils
 import java.util
 import CloudOrg.Network.Topologies
 import org.cloudbus.cloudsim.core.{CloudSim, Simulation}

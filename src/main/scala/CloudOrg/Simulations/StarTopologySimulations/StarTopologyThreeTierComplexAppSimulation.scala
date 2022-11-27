@@ -3,8 +3,7 @@ package CloudOrg.Simulations.StarTopologySimulations
 import CloudOrg.Brokers.TopologyAwareDatacenterBroker
 import CloudOrg.Datacenters.StarNetworkDatacenter
 import CloudOrg.Applications.ThreeTierApplication
-import CloudOrg.HelperUtils.CreateLogger
-import CloudOrg.utils
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import org.cloudbus.cloudsim.allocationpolicies.{VmAllocationPolicyRandom, VmAllocationPolicySimple}
 import org.cloudbus.cloudsim.brokers.{DatacenterBroker, DatacenterBrokerHeuristic}
 import org.cloudbus.cloudsim.core.CloudSim

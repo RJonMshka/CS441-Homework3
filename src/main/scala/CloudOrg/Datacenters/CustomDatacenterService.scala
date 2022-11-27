@@ -1,9 +1,8 @@
 package CloudOrg.Datacenters
 
 import CloudOrg.Applications.{MapReduceJob, ThreeTierApplication}
-import CloudOrg.HelperUtils.CreateLogger
+import CloudOrg.HelperUtils.{CreateLogger, utils}
 import CloudOrg.Datacenters.{HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
-import CloudOrg.utils
 import org.cloudbus.cloudsim.brokers.DatacenterBroker
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.hosts.Host
