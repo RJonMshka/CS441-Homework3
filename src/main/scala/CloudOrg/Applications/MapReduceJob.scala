@@ -1,21 +1,24 @@
 package CloudOrg.Applications
 
-import CloudOrg.HelperUtils.utils
+import CloudOrg.HelperUtils.{ObtainConfigReference, utils}
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudlet
 
 object MapReduceJob {
 
-  val mapTaskLength = 1000
-  val mapTaskMemory = 1024
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val mapReduceConfig = config.getConfig("cloudOrganizationSimulations.mapReduce")
 
-  val sendTaskMemory = 512
-  val receiveTaskMemory = 512
+  val mapTaskLength = mapReduceConfig.getInt("mapTaskLength")
+  val mapTaskMemory = mapReduceConfig.getInt("mapTaskMemory")
 
-  val packetsToSend = 200
-  val packetBytes = 1000
+  val sendTaskMemory = mapReduceConfig.getInt("sendTaskMemory")
+  val receiveTaskMemory = mapReduceConfig.getInt("receiveTaskMemory")
 
-  val reduceTaskLength = 500
-  val reduceTaskMemory = 512
+  val packetsToSend = mapReduceConfig.getInt("packetsToSend")
+  val packetBytes = mapReduceConfig.getInt("packetBytes")
+
+  val reduceTaskLength = mapReduceConfig.getInt("reduceTaskLength")
+  val reduceTaskMemory = mapReduceConfig.getInt("reduceTaskMemory")
 
   def createMapReduceTasks(mapperOneCloudlet: NetworkCloudlet, mapperTwoCloudlet: NetworkCloudlet, mapperThreeCloudlet: NetworkCloudlet, reducerCloudlet: NetworkCloudlet): Unit =
     // map task

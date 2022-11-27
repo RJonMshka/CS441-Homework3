@@ -1,6 +1,6 @@
 package CloudOrg.Simulations
 
-import CloudOrg.HelperUtils.{CreateLogger, utils}
+import CloudOrg.HelperUtils.{CreateLogger, ObtainConfigReference, utils}
 import org.cloudbus.cloudsim.brokers.DatacenterBroker
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.datacenters.DatacenterSimple
@@ -10,26 +10,29 @@ import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 object BasicSimulation {
   
   val logger = CreateLogger(classOf[BasicSimulation.type])
-  val hosts_count = 4
-  val host_mips = 1000
-  val host_pe_count = 8
-  val host_ram = 16_384
-  val host_bw = 10_000l
-  val host_storage = 1_000_000l
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val basicSimConfig = config.getConfig("cloudOrganizationSimulations.basic")
 
-  val vm_count = 8
-  val vm_pe_count = 2
+  val hosts_count = basicSimConfig.getInt("hosts_count")
+  val host_mips = basicSimConfig.getInt("host_mips")
+  val host_pe_count = basicSimConfig.getInt("host_pe_count")
+  val host_ram = basicSimConfig.getInt("host_ram")
+  val host_bw = basicSimConfig.getInt("host_bw")
+  val host_storage = basicSimConfig.getInt("host_storage")
 
-  val cloudlet_count = 10
-  val cloudlet_pe_count = 2
-  val cloudlet_length = 10000
-  val cloudlet_file_size = 200
-  val cloudlet_output_size = 500
+  val vm_count = basicSimConfig.getInt("vm_count")
+  val vm_pe_count = basicSimConfig.getInt("vm_pe_count")
+
+  val cloudlet_count = basicSimConfig.getInt("cloudlet_count")
+  val cloudlet_pe_count = basicSimConfig.getInt("cloudlet_pe_count")
+  val cloudlet_length = basicSimConfig.getInt("cloudlet_length")
+  val cloudlet_file_size = basicSimConfig.getInt("cloudlet_file_size")
+  val cloudlet_output_size = basicSimConfig.getInt("cloudlet_output_size")
 
   // datacenter allocation Policy
-  val allocationPolicyType = "SIMPLE"
+  val allocationPolicyType = basicSimConfig.getString("allocationPolicyType")
   // vm scheduling policy
-  val vmSchedulerType = "TIMESHARED"
+  val vmSchedulerType = basicSimConfig.getString("vmSchedulerType")
 
   def main(args: Array[String]): Unit = {
     val simulation:CloudSim = CloudSim()

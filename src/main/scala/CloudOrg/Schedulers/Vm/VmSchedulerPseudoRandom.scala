@@ -1,5 +1,6 @@
 package CloudOrg.Schedulers.Vm
 
+import CloudOrg.HelperUtils.ObtainConfigReference
 import org.cloudbus.cloudsim.distributions.UniformDistr
 import org.cloudbus.cloudsim.schedulers.MipsShare
 import org.cloudbus.cloudsim.schedulers.vm.VmSchedulerAbstract
@@ -10,7 +11,9 @@ import java.util
 import scala.jdk.CollectionConverters.*
 
 class VmSchedulerPseudoRandom(private val chance: Double, migrationOverhead: Double) extends VmSchedulerAbstract(migrationOverhead):
-  private val randomSeed = 50
+  private val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  private val vmSchedulerConfig = config.getConfig("cloudOrganizationSimulations.vmscheduler")
+  private val randomSeed = vmSchedulerConfig.getInt("randomPolicySeed")
   private val random = UniformDistr(0, 1, randomSeed)
 
   override def isSuitableForVmInternal(vm: Vm, requestedMips: MipsShare): Boolean =

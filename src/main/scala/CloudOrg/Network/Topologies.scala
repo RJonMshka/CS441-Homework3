@@ -1,5 +1,6 @@
 package CloudOrg.Network
 
+import CloudOrg.HelperUtils.ObtainConfigReference
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.datacenters.network.NetworkDatacenter
 import org.cloudbus.cloudsim.hosts.network.NetworkHost
@@ -10,17 +11,20 @@ import scala.jdk.CollectionConverters.*
 
 object Topologies {
 
-  private val edge_switch_bw_down = 10.0
-  private val edge_switch_bw_up = 10.0
-  private val edge_switch_switching_delay = 1.0
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val networkConfig = config.getConfig("cloudOrganizationSimulations.network")
 
-  private val aggregate_switch_bw_down = 50.0
-  private val aggregate_switch_bw_up = 50.0
-  private val aggregate_switch_switching_delay = 1.0
+  private val edge_switch_bw_down = networkConfig.getDouble("edge_switch_bw_down")
+  private val edge_switch_bw_up = networkConfig.getDouble("edge_switch_bw_up")
+  private val edge_switch_switching_delay = networkConfig.getDouble("edge_switch_switching_delay")
 
-  private val root_switch_bw_down = 100.0
-  private val root_switch_bw_up = 100.0
-  private val root_switch_switching_delay = 1.0
+  private val aggregate_switch_bw_down = networkConfig.getDouble("aggregate_switch_bw_down")
+  private val aggregate_switch_bw_up = networkConfig.getDouble("aggregate_switch_bw_up")
+  private val aggregate_switch_switching_delay = networkConfig.getDouble("aggregate_switch_switching_delay")
+
+  private val root_switch_bw_down = networkConfig.getDouble("root_switch_bw_down")
+  private val root_switch_bw_up = networkConfig.getDouble("root_switch_bw_up")
+  private val root_switch_switching_delay = networkConfig.getDouble("root_switch_switching_delay")
 
   private def setEdgeSwitch(simulation: CloudSim, datacenter: NetworkDatacenter): EdgeSwitch =
     val edgeSwitch = EdgeSwitch(simulation, datacenter)

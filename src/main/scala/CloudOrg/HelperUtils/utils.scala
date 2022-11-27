@@ -33,28 +33,27 @@ import scala.jdk.CollectionConverters.*
 object utils {
 
   val logger: Logger = CreateLogger(classOf[utils.type])
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val powerConfig = config.getConfig("cloudOrganizationSimulations.power")
+  val allocationConfig = config.getConfig("cloudOrganizationSimulations.allocation")
+  val vmSchedulerConfig = config.getConfig("cloudOrganizationSimulations.vmscheduler")
 
-  val STATIC_POWER = 20
-  val MAX_POWER = 100
+  val STATIC_POWER = powerConfig.getInt("static_power")
+  val MAX_POWER = powerConfig.getInt("max_power")
 
-  val HOST_STARTUP_DELAY = 0
-  val HOST_SHUTDOWN_DELAY = 0
-  val HOST_STARTUP_POWER = 10
-  val HOST_SHUTDOWN_POWER = 5
+  val HOST_STARTUP_DELAY = powerConfig.getInt("startup_delay")
+  val HOST_SHUTDOWN_DELAY = powerConfig.getInt("shutdown_delay")
+  val HOST_STARTUP_POWER = powerConfig.getInt("startup_power")
+  val HOST_SHUTDOWN_POWER = powerConfig.getInt("shutdown_power")
 
-  val randomAllocationPolicySeed = 40
+  val randomAllocationPolicySeed = allocationConfig.getInt("random_allocation_policy_seed")
 
-  val vmChance = 0.9
-  val vmMigrationOverhead = 0.1
+  val vmChance = vmSchedulerConfig.getDouble("vmChanceForPseudoRandom")
+  val vmMigrationOverhead = vmSchedulerConfig.getDouble("vmMigrationCpuOverhead")
 
   enum NetworkDatacenterType:
     case STAR, TREE, RING, BUS, HYBRID, NORMAL
 
-  class RandomIntGenerator(minValue: Int, maxValue: Int, seed: Int):
-    val random = UniformDistr(minValue, maxValue, seed)
-
-    def getNextRandomValue(): Double =
-      random.sample()
 
   def createNwDatacenter(nwDatacenterType: NetworkDatacenterType, simulation: CloudSim, hostList: util.List[NetworkHost], vmAllocationPolicy: VmAllocationPolicy, treeSize: Int): NetworkDatacenter =
     nwDatacenterType match
@@ -67,15 +66,6 @@ object utils {
 
   def createBroker(simulation: CloudSim): DatacenterBroker =
     DatacenterBrokerSimple(simulation)
-
-  def createBrokerHeuristic(simulation: CloudSim): DatacenterBroker =
-    val broker = DatacenterBrokerHeuristic(simulation)
-    val hr = CloudletToVmMappingSimulatedAnnealing(0.1, UniformDistr(0, 1))
-    hr.setColdTemperature(0.0001)
-    hr.setCoolingRate(0.003)
-    hr.setSearchesByIteration(50)
-    broker.setHeuristic(hr)
-    broker
 
   def createPeList(pes: Int, mips: Long): util.List[Pe] =
     Range(0, pes).map(_ => PeSimple(mips)).toList.asJava

@@ -1,6 +1,6 @@
 package CloudOrg.Simulations
 
-import CloudOrg.HelperUtils.{CreateLogger, utils}
+import CloudOrg.HelperUtils.{CreateLogger, ObtainConfigReference, utils}
 import CloudOrg.Brokers.{TopologyAwareBrokerBestFit, TopologyAwareDatacenterBroker}
 import CloudOrg.Datacenters.{BusNetworkDatacenter, HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
 import CloudOrg.Applications.{MapReduceJob, ThreeTierApplication}
@@ -18,84 +18,84 @@ import scala.jdk.CollectionConverters.*
 
 object MultiDatacenterNetworkTopologySimulation {
   val logger = CreateLogger(classOf[MultiDatacenterNetworkTopologySimulation.type])
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val multiDCSimConfig = config.getConfig("cloudOrganizationSimulations.multiDatacenter")
+  val treeNetworkConfig = config.getConfig("cloudOrganizationSimulations.treeTopology")
+  val mapReduceConfig = config.getConfig("cloudOrganizationSimulations.mapReduce")
+  val threeTierAppConfig = config.getConfig("cloudOrganizationSimulations.threeTier")
+
+  // tree topology specific
+  val tree_count = treeNetworkConfig.getInt("tree_count")
 
   // host variables
-  val tree_count = 3
-  val hosts_count = 9
-  val host_mips = 1000
-  val host_pe_count = 4
-  val host_ram = 16_384
-  val host_bw = 1_000_000l
-  val host_storage = 1_000_000l
-  
-  val datacenter_count = 5
-
+  val hosts_count = multiDCSimConfig.getInt("hosts_count")
+  val host_mips = multiDCSimConfig.getInt("host_mips")
+  val host_pe_count = multiDCSimConfig.getInt("host_pe_count")
+  val host_ram = multiDCSimConfig.getInt("host_ram")
+  val host_bw = multiDCSimConfig.getLong("host_bw")
+  val host_storage = multiDCSimConfig.getLong("host_storage")
+  // dc variable
+  val datacenter_count = multiDCSimConfig.getInt("datacenter_count")
   // vm variables
-  val vm_count = 18 * datacenter_count
-  val vm_pe_count = 2
-  val vm_ram = 2048
-  val vm_bw = 10000
-  val vm_size = 20_000
+  val vm_count = multiDCSimConfig.getInt("vm_count") * datacenter_count
+  val vm_pe_count = multiDCSimConfig.getInt("vm_pe_count")
+  val vm_ram = multiDCSimConfig.getInt("vm_ram")
+  val vm_bw = multiDCSimConfig.getInt("vm_bw")
+  val vm_size = multiDCSimConfig.getInt("vm_size")
 
   // simple tasks count
-  val simple_cloudlet_count = 250
+  val simple_cloudlet_count = multiDCSimConfig.getInt("simple_cloudlet_count")
 
   // three tier job
-  val client_cloudlet_task_count = 1
-  val server_cloudlet_task_count = 2
+  val client_cloudlet_task_count = threeTierAppConfig.getInt("client_cloudlets")
+  val server_cloudlet_task_count = threeTierAppConfig.getInt("server_cloudlets")
   val client_server_task_cloudlets_count = client_cloudlet_task_count + server_cloudlet_task_count
-  val client_server_app_count = 100
+  val client_server_app_count = multiDCSimConfig.getInt("client_server_app_count")
   val client_server_cloudlet_count = client_server_task_cloudlets_count * client_server_app_count
 
   // map reduce job
-  val mapper_cloudlet_count = 3
-  val reducer_cloudlet_count = 1
+  val mapper_cloudlet_count = mapReduceConfig.getInt("mapper_cloudlets")
+  val reducer_cloudlet_count = mapReduceConfig.getInt("reducer_cloudlets")
   val map_reduce_app_cloudlet_count = mapper_cloudlet_count + reducer_cloudlet_count
-  val map_reduce_app_count = 100
+  val map_reduce_app_count = multiDCSimConfig.getInt("map_reduce_app_count")
   val map_reduce_cloudlet_count = map_reduce_app_count * map_reduce_app_cloudlet_count
 
-  val cloudlet_pe_count = 1
-  val cloudlet_length = 500
-  val cloudlet_file_size = 200
-  val cloudlet_output_size = 500
-
-  // inter datacenter connection variables
-  val connection_bw = 250.0d
-  val connection_latency = 1.0d
+  val cloudlet_pe_count = multiDCSimConfig.getInt("cloudlet_pe_count")
+  val cloudlet_length = multiDCSimConfig.getInt("cloudlet_length")
 
   // Utilization
-  val cloudlet_cpu_utilization = 0.9
-  val cloudlet_ram_utilization = 0.5
-  val cloudlet_bw_utilization = 0.3
-  val cloudlet_initial_ram_utilization = 0.1
-  val cloudlet_max_ram_utilization = 0.9
+  val cloudlet_cpu_utilization = multiDCSimConfig.getDouble("cloudlet_cpu_utilization")
+  val cloudlet_ram_utilization = multiDCSimConfig.getDouble("cloudlet_ram_utilization")
+  val cloudlet_bw_utilization = multiDCSimConfig.getDouble("cloudlet_bw_utilization")
+  val cloudlet_initial_ram_utilization = multiDCSimConfig.getDouble("cloudlet_initial_ram_utilization")
+  val cloudlet_max_ram_utilization = multiDCSimConfig.getDouble("cloudlet_max_ram_utilization")
+
+  // inter datacenter and broker connection variables
+  val inter_dc_connection_bw = multiDCSimConfig.getDouble("inter_dc_connection_bw")
+  val inter_dc_connection_latency = multiDCSimConfig.getDouble("inter_dc_connection_latency")
+  val dc_broker_connection_bw = multiDCSimConfig.getDouble("dc_broker_connection_bw")
+  val dc_broker_connection_latency = multiDCSimConfig.getDouble("dc_broker_connection_latency")
 
   // cost
-  val cost_per_sec = 0.001
-  val cost_per_mem = 0.001
-  val cost_per_storage = 0.0001
-  val cost_per_bw = 0.01
-
-  // Simulated annealing heuristic params
-  val initial_temperature = 0.1
-  val cold_temperature = 0.001
-  val cooling_rate = 0.01
-  val number_of_searches = 50
+  val cost_per_sec = multiDCSimConfig.getDouble("cost_per_sec")
+  val cost_per_mem = multiDCSimConfig.getDouble("cost_per_mem")
+  val cost_per_storage = multiDCSimConfig.getDouble("cost_per_storage")
+  val cost_per_bw = multiDCSimConfig.getDouble("cost_per_bw")
 
   // scaling
   // horizontal scaling
-  val cpu_overload_threshold = 0.8
+  val cpu_overload_threshold = multiDCSimConfig.getDouble("cpu_overload_threshold")
   // vertical ram scaling
-  val ram_scaling_factor = 0.1
-  val ram_upper_utilization_threshold = 0.8
-  val ram_lower_utilization_threshold = 0.3
+  val ram_scaling_factor = multiDCSimConfig.getDouble("ram_scaling_factor")
+  val ram_upper_utilization_threshold = multiDCSimConfig.getDouble("ram_upper_utilization_threshold")
+  val ram_lower_utilization_threshold = multiDCSimConfig.getDouble("ram_lower_utilization_threshold")
 
   // datacenter allocation Policy
-  val allocationPolicyType = "BESTFIT"
+  val allocationPolicyType = multiDCSimConfig.getString("allocationPolicyType")
   // vm scheduling policy
-  val vmSchedulerType = "TIMESHARED"
+  val vmSchedulerType = multiDCSimConfig.getString("vmSchedulerType")
   // cloudlet scheduling policy
-  val cloudletSchedulerType = "SPACESHARED"
+  val cloudletSchedulerType = multiDCSimConfig.getString("cloudletSchedulerType")
 
   def main(args: Array[String]): Unit = {
 
@@ -128,7 +128,7 @@ object MultiDatacenterNetworkTopologySimulation {
     utils.setDatacenterCost(datacenter5, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
     // configure inter-datacenter network topology
-    utils.configureNetwork(simulation, datacenter1, datacenter2, datacenter3, datacenter4, datacenter5, broker, connection_latency, connection_bw, connection_latency, connection_bw)
+    utils.configureNetwork(simulation, datacenter1, datacenter2, datacenter3, datacenter4, datacenter5, broker, inter_dc_connection_latency, inter_dc_connection_bw, inter_dc_connection_latency, inter_dc_connection_bw)
 
     // creating VMs and applying auto-scaling parameters are well
     val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, cloudletSchedulerType)
@@ -165,7 +165,6 @@ object MultiDatacenterNetworkTopologySimulation {
     simulation.start
 
     val finishedCloudlets = broker.getCloudletFinishedList
-
     // printing table of cloudlet execution
     CloudletsTableBuilder(finishedCloudlets).build
     // printing other performance related parameters - cost, power consumption and utilization

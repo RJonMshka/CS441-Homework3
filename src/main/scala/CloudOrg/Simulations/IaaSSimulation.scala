@@ -3,38 +3,41 @@ package CloudOrg.Simulations
 import org.cloudbus.cloudsim.brokers.DatacenterBrokerSimple
 import org.cloudbus.cloudsim.core.CloudSim
 import CloudOrg.Datacenters.CustomDatacenterService
+import CloudOrg.HelperUtils.ObtainConfigReference
 
 object IaaSSimulation {
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val iaasSimConfig = config.getConfig("cloudOrganizationSimulations.iaasSim")
 
   // variables for map reduce app on an iaas
-  val mapReduceAppsToRun = 300
-  val mapReduceCloudletLength = 1000
-  val mapReduceAppPe = 2
-  val mapReduceCloudScalingEnabled = true
-  val mapReduceRamScalingFactor = 0.1
-  val mapReduceCpuOverloadThreshold = 0.8
-  val mapReduceRamUpperThreshold = 0.8
-  val mapReduceRamLowerThreshold = 0.2
+  val mapReduceAppsToRun = iaasSimConfig.getInt("mapReduceAppsToRun")
+  val mapReduceCloudletLength = iaasSimConfig.getInt("mapReduceCloudletLength")
+  val mapReduceAppPe = iaasSimConfig.getInt("mapReduceAppPe")
+  val mapReduceCloudScalingEnabled = iaasSimConfig.getBoolean("mapReduceCloudScalingEnabled")
+  val mapReduceRamScalingFactor = iaasSimConfig.getDouble("mapReduceRamScalingFactor")
+  val mapReduceCpuOverloadThreshold = iaasSimConfig.getDouble("mapReduceCpuOverloadThreshold")
+  val mapReduceRamUpperThreshold = iaasSimConfig.getDouble("mapReduceRamUpperThreshold")
+  val mapReduceRamLowerThreshold = iaasSimConfig.getDouble("mapReduceRamLowerThreshold")
 
   // variables for three tier app on an iaas
-  val threeTierAppsToRun = 30
-  val threeTierCloudletLength = 1000
-  val threeTierAppPe = 1
-  val threeTierCloudScalingEnabled = true
-  val threeTierRamScalingFactor = 0.2
-  val threeTierCpuOverloadThreshold = 0.8
-  val threeTierRamUpperThreshold = 0.9
-  val threeTierRamLowerThreshold = 0.1
+  val threeTierAppsToRun = iaasSimConfig.getInt("threeTierAppsToRun")
+  val threeTierCloudletLength = iaasSimConfig.getInt("threeTierCloudletLength")
+  val threeTierAppPe = iaasSimConfig.getInt("threeTierAppPe")
+  val threeTierCloudScalingEnabled = iaasSimConfig.getBoolean("threeTierCloudScalingEnabled")
+  val threeTierRamScalingFactor = iaasSimConfig.getDouble("threeTierRamScalingFactor")
+  val threeTierCpuOverloadThreshold = iaasSimConfig.getDouble("threeTierCpuOverloadThreshold")
+  val threeTierRamUpperThreshold = iaasSimConfig.getDouble("threeTierRamUpperThreshold")
+  val threeTierRamLowerThreshold = iaasSimConfig.getDouble("threeTierRamLowerThreshold")
 
   // variables for simple (single simple cloudlet) app on an iaas
-  val simpleAppsToRun = 100
-  val simpleCloudletLength = 10000
-  val simpleAppPe = 1
-  val simpleCloudScalingEnabled = false
-  val simpleRamScalingFactor = 0.2
-  val simpleCpuOverloadThreshold = 0.8
-  val simpleRamUpperThreshold = 0.9
-  val simpleRamLowerThreshold = 0.1
+  val simpleAppsToRun = iaasSimConfig.getInt("simpleAppsToRun")
+  val simpleCloudletLength = iaasSimConfig.getInt("simpleCloudletLength")
+  val simpleAppPe = iaasSimConfig.getInt("simpleAppPe")
+  val simpleCloudScalingEnabled = iaasSimConfig.getBoolean("simpleCloudScalingEnabled")
+  val simpleRamScalingFactor = iaasSimConfig.getDouble("simpleRamScalingFactor")
+  val simpleCpuOverloadThreshold = iaasSimConfig.getDouble("simpleCpuOverloadThreshold")
+  val simpleRamUpperThreshold = iaasSimConfig.getDouble("simpleRamUpperThreshold")
+  val simpleRamLowerThreshold = iaasSimConfig.getDouble("simpleRamLowerThreshold")
 
   def iaaSMapReduceAppSimulation(): Unit =
     val simulation = CloudSim()
@@ -89,7 +92,7 @@ object IaaSSimulation {
     )
 
   def main(args: Array[String]): Unit = {
-    iaaSSimpleAppSimulation()
+    iaaSMapReduceAppSimulation()
   }
 
 

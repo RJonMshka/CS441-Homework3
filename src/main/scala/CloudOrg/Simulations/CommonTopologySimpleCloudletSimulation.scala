@@ -1,6 +1,6 @@
 package CloudOrg.Simulations
 
-import CloudOrg.HelperUtils.{CreateLogger, utils}
+import CloudOrg.HelperUtils.{CreateLogger, ObtainConfigReference, utils}
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple
 import org.cloudbus.cloudsim.brokers.{DatacenterBrokerHeuristic, DatacenterBrokerSimple}
 import org.cloudbus.cloudsim.core.CloudSim
@@ -11,63 +11,59 @@ import scala.jdk.CollectionConverters.*
 
 object CommonTopologySimpleCloudletSimulation {
   val logger = CreateLogger(classOf[CommonTopologySimpleCloudletSimulation.type])
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val commonConfig = config.getConfig("cloudOrganizationSimulations.commonSimulation")
+  val simpleConfig = config.getConfig("cloudOrganizationSimulations.simpleCloudlet")
+  val treeNetworkConfig = config.getConfig("cloudOrganizationSimulations.treeTopology")
 
-  val tree_count = 3
-  val hosts_count = 9
-  val host_mips = 1000
-  val host_pe_count = 4
-  val host_ram = 16_384
-  val host_bw = 1000
-  val host_storage = 1_000_000l
+  val tree_count = treeNetworkConfig.getInt("tree_count")
+  val hosts_count = commonConfig.getInt("hosts_count")
+  val host_mips = commonConfig.getInt("host_mips")
+  val host_pe_count = commonConfig.getInt("host_pe_count")
+  val host_ram = commonConfig.getInt("host_ram")
+  val host_bw = commonConfig.getInt("host_bw")
+  val host_storage = commonConfig.getInt("host_storage")
 
-  val vm_count = 18
-  val vm_pe_count = 2
-  val vm_ram = 4000
-  val vm_bw = 1
-  val vm_size = 20_000
+  val vm_count = commonConfig.getInt("vm_count")
+  val vm_pe_count = commonConfig.getInt("vm_pe_count")
+  val vm_ram = commonConfig.getInt("vm_ram")
+  val vm_bw = commonConfig.getInt("vm_bw")
+  val vm_size = commonConfig.getInt("vm_size")
 
-  val cloudlet_count = 150
-  val cloudlet_pe_count = 1
-  val cloudlet_length = 1000
-  val cloudlet_file_size = 200
-  val cloudlet_output_size = 500
+  val cloudlet_count = simpleConfig.getInt("app_count")
+  val cloudlet_pe_count = commonConfig.getInt("cloudlet_pe_count")
+  val cloudlet_length = commonConfig.getInt("cloudlet_length")
+  val cloudlet_file_size = commonConfig.getInt("cloudlet_file_size")
+  val cloudlet_output_size = commonConfig.getInt("cloudlet_output_size")
 
-  val connection_bw = 250.0d
-  val connection_latency = 1.0d
 
   // Utilization
-  val cloudlet_cpu_utilization = 0.8
-  val cloudlet_ram_utilization = 0.5
-  val cloudlet_bw_utilization = 0.3
-  val cloudlet_initial_ram_utilization = 0.1
-  val cloudlet_max_ram_utilization = 0.8
+  val cloudlet_cpu_utilization = commonConfig.getDouble("cloudlet_cpu_utilization")
+  val cloudlet_ram_utilization = commonConfig.getDouble("cloudlet_ram_utilization")
+  val cloudlet_bw_utilization = commonConfig.getDouble("cloudlet_bw_utilization")
+  val cloudlet_initial_ram_utilization = commonConfig.getDouble("cloudlet_initial_ram_utilization")
+  val cloudlet_max_ram_utilization = commonConfig.getDouble("cloudlet_max_ram_utilization")
 
   // cost
-  val cost_per_sec = 0.001
-  val cost_per_mem = 0.01
-  val cost_per_storage = 0.0001
-  val cost_per_bw = 0.01
-
-  // Simulated annealing heuristic params
-  val initial_temperature = 0.1
-  val cold_temperature = 0.0001
-  val cooling_rate = 0.001
-  val number_of_searches = 100
+  val cost_per_sec = commonConfig.getDouble("cost_per_sec")
+  val cost_per_mem = commonConfig.getDouble("cost_per_mem")
+  val cost_per_storage = commonConfig.getDouble("cost_per_storage")
+  val cost_per_bw = commonConfig.getDouble("cost_per_bw")
 
   // scaling
   // horizontal scaling
-  val cpu_overload_threshold = 0.8
+  val cpu_overload_threshold = commonConfig.getDouble("cpu_overload_threshold")
   // vertical ram scaling
-  val ram_scaling_factor = 0.1
-  val ram_upper_utilization_threshold = 0.8
-  val ram_lower_utilization_threshold = 0.3
+  val ram_scaling_factor = commonConfig.getDouble("ram_scaling_factor")
+  val ram_upper_utilization_threshold = commonConfig.getDouble("ram_upper_utilization_threshold")
+  val ram_lower_utilization_threshold = commonConfig.getDouble("ram_lower_utilization_threshold")
 
   // datacenter allocation Policy
-  val allocationPolicyType = "SIMPLE"
+  val allocationPolicyType = simpleConfig.getString("allocationPolicyType")
   // vm scheduling policy
-  val vmSchedulerType = "PSEUDORANDOM"
+  val vmSchedulerType = simpleConfig.getString("vmSchedulerType")
   // cloudlet scheduling policy
-  val cloudletSchedulerType = "SPACESHARED"
+  val cloudletSchedulerType = simpleConfig.getString("cloudletSchedulerType")
 
   def startSimulation(datacenterType: utils.NetworkDatacenterType): Unit =
     val simulation: CloudSim = CloudSim()

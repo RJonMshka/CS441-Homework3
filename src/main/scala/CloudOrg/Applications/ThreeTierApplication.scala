@@ -1,34 +1,36 @@
 package CloudOrg.Applications
 
-import CloudOrg.HelperUtils.utils
+import CloudOrg.HelperUtils.{ObtainConfigReference, utils}
 import org.cloudbus.cloudsim.cloudlets.network.NetworkCloudlet
 
 object ThreeTierApplication {
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val threeTierAppConfig = config.getConfig("cloudOrganizationSimulations.threeTier")
 
-  val firstTaskExecLength = 500
-  val firstTaskExecMemoryConsumption = 512
-  val firstTaskSendMemoryConsumption = 256
-  val firstTaskReceiveMemoryConsumption = 256
-  val firstTaskPacketsToSend = 50
-  val firstTaskPacketBytes = 1000
+  val firstTaskExecLength = threeTierAppConfig.getInt("firstTaskExecLength")
+  val firstTaskExecMemoryConsumption = threeTierAppConfig.getInt("firstTaskExecMemoryConsumption")
+  val firstTaskSendMemoryConsumption = threeTierAppConfig.getInt("firstTaskSendMemoryConsumption")
+  val firstTaskReceiveMemoryConsumption = threeTierAppConfig.getInt("firstTaskReceiveMemoryConsumption")
+  val firstTaskPacketsToSend = threeTierAppConfig.getInt("firstTaskPacketsToSend")
+  val firstTaskPacketBytes = threeTierAppConfig.getInt("firstTaskPacketBytes")
 
-  val secondTaskExecLength = 2000
-  val secondTaskExecMemoryConsumption = 512
-  val secondTaskSendToFirstMemoryConsumption = 256
-  val secondTaskReceiveFromFirstMemoryConsumption = 256
-  val secondTaskSendToThirdMemoryConsumption = 512
-  val secondTaskReceiveFromThirdMemoryConsumption = 512
-  val secondTaskPacketsToSendToFirst = 10
-  val secondTaskPacketBytesSendToFirst = 1000
-  val secondTaskPacketsToSendToThird = 100
-  val secondTaskPacketBytesSendToThird = 1000
+  val secondTaskExecLength = threeTierAppConfig.getInt("secondTaskExecLength")
+  val secondTaskExecMemoryConsumption = threeTierAppConfig.getInt("secondTaskExecMemoryConsumption")
+  val secondTaskSendToFirstMemoryConsumption = threeTierAppConfig.getInt("secondTaskSendToFirstMemoryConsumption")
+  val secondTaskReceiveFromFirstMemoryConsumption = threeTierAppConfig.getInt("secondTaskReceiveFromFirstMemoryConsumption")
+  val secondTaskSendToThirdMemoryConsumption = threeTierAppConfig.getInt("secondTaskSendToThirdMemoryConsumption")
+  val secondTaskReceiveFromThirdMemoryConsumption = threeTierAppConfig.getInt("secondTaskReceiveFromThirdMemoryConsumption")
+  val secondTaskPacketsToSendToFirst = threeTierAppConfig.getInt("secondTaskPacketsToSendToFirst")
+  val secondTaskPacketBytesSendToFirst = threeTierAppConfig.getInt("secondTaskPacketBytesSendToFirst")
+  val secondTaskPacketsToSendToThird = threeTierAppConfig.getInt("secondTaskPacketsToSendToThird")
+  val secondTaskPacketBytesSendToThird = threeTierAppConfig.getInt("secondTaskPacketBytesSendToThird")
 
-  val thirdTaskExecLength = 500
-  val thirdTaskExecMemoryConsumption = 512
-  val thirdTaskSendMemoryConsumption = 256
-  val thirdTaskReceiveMemoryConsumption = 256
-  val thirdTaskPacketsToSend = 50
-  val thirdTaskPacketBytes = 1000
+  val thirdTaskExecLength = threeTierAppConfig.getInt("thirdTaskExecLength")
+  val thirdTaskExecMemoryConsumption = threeTierAppConfig.getInt("thirdTaskExecMemoryConsumption")
+  val thirdTaskSendMemoryConsumption = threeTierAppConfig.getInt("thirdTaskSendMemoryConsumption")
+  val thirdTaskReceiveMemoryConsumption = threeTierAppConfig.getInt("thirdTaskReceiveMemoryConsumption")
+  val thirdTaskPacketsToSend = threeTierAppConfig.getInt("thirdTaskPacketsToSend")
+  val thirdTaskPacketBytes = threeTierAppConfig.getInt("thirdTaskPacketBytes")
 
   def createAppWorkFlow(firstCloudlet: NetworkCloudlet, secondCloudlet: NetworkCloudlet, thirdCloudlet: NetworkCloudlet): Unit =
     // First cloudlet tasks

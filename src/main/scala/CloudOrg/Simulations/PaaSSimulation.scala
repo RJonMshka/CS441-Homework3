@@ -3,18 +3,21 @@ package CloudOrg.Simulations
 import org.cloudbus.cloudsim.brokers.DatacenterBrokerSimple
 import org.cloudbus.cloudsim.core.CloudSim
 import CloudOrg.Datacenters.CustomDatacenterService
+import CloudOrg.HelperUtils.ObtainConfigReference
 
 object PaaSSimulation {
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val paasSimConfig = config.getConfig("cloudOrganizationSimulations.paasSim")
 
   // Map Reduce PaaS inputs
-  val mapReduceJobs = 20
-  val jobLength = 1000
-  val mapReduceJobPeConsumption = 1
+  val mapReduceJobs = paasSimConfig.getInt("mapReduceJobs")
+  val jobLength = paasSimConfig.getInt("jobLength")
+  val mapReduceJobPeConsumption = paasSimConfig.getInt("mapReduceJobPeConsumption")
 
   // Three Tier PaaS inputs
-  val threeTierAppInstances = 20
-  val executionLength = 1000
-  val threeTierAppPeConsumption = 1
+  val threeTierAppInstances = paasSimConfig.getInt("threeTierAppInstances")
+  val executionLength = paasSimConfig.getInt("executionLength")
+  val threeTierAppPeConsumption = paasSimConfig.getInt("threeTierAppPeConsumption")
 
 
   // Three Tier PaaS inputs

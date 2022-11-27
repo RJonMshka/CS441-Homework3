@@ -1,7 +1,7 @@
 package CloudOrg.Datacenters
 
 import CloudOrg.Applications.{MapReduceJob, ThreeTierApplication}
-import CloudOrg.HelperUtils.{CreateLogger, utils}
+import CloudOrg.HelperUtils.{CreateLogger, ObtainConfigReference, utils}
 import CloudOrg.Datacenters.{HybridNetworkDatacenter, RingNetworkDatacenter, StarNetworkDatacenter, TreeNetworkDatacenter}
 import org.cloudbus.cloudsim.brokers.DatacenterBroker
 import org.cloudbus.cloudsim.core.CloudSim
@@ -17,13 +17,21 @@ import scala.jdk.CollectionConverters.*
 object CustomDatacenterService {
 
   val logger = CreateLogger(classOf[CustomDatacenterService.type])
+  val config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val threeTierAppConfig = config.getConfig("cloudOrganizationSimulations.threeTier")
+  val mapReduceConfig = config.getConfig("cloudOrganizationSimulations.mapReduce")
+  val treeNetworkConfig = config.getConfig("cloudOrganizationSimulations.treeTopology")
+  val saasconfig = config.getConfig("cloudOrganizationSimulations.saas")
+  val paasconfig = config.getConfig("cloudOrganizationSimulations.paas")
+  val iaasconfig = config.getConfig("cloudOrganizationSimulations.iaas")
+  val faasconfig = config.getConfig("cloudOrganizationSimulations.faas")
 
   // App specific variables
   // map reduce total cloudlet for a single map reduce job
-  val map_reduce_cloudlet_count = 4
+  val map_reduce_cloudlet_count = mapReduceConfig.getInt("mapper_cloudlets") + mapReduceConfig.getInt("reducer_cloudlets")
 
   // three tier total cloudlet for a single instance of app
-  val three_tier_cloudlet_count = 3
+  val three_tier_cloudlet_count = threeTierAppConfig.getInt("client_cloudlets") + threeTierAppConfig.getInt("server_cloudlets")
 
   enum Application:
     case MapReduce, ThreeTier, Simple
@@ -32,196 +40,196 @@ object CustomDatacenterService {
   enum SaaSCloudletType:
     case Type1, Type2, Type3
 
-  val saas_hosts_count = 9
-  val saas_host_mips = 1000
-  val saas_host_pe_count = 4
-  val saas_host_ram = 16_384
-  val saas_host_bw = 1000
-  val saas_host_storage = 1_000_000l
+  val saas_hosts_count = saasconfig.getInt("saas_hosts_count")
+  val saas_host_mips = saasconfig.getInt("saas_host_mips")
+  val saas_host_pe_count = saasconfig.getInt("saas_host_pe_count")
+  val saas_host_ram = saasconfig.getInt("saas_host_ram")
+  val saas_host_bw = saasconfig.getInt("saas_host_bw")
+  val saas_host_storage = saasconfig.getInt("saas_host_storage")
 
-  val saas_vm_count = 18
-  val saas_vm_pe_count = 2
-  val saas_vm_ram = 4000
-  val saas_vm_bw = 1
-  val saas_vm_size = 20_000
+  val saas_vm_count = saasconfig.getInt("saas_vm_count")
+  val saas_vm_pe_count = saasconfig.getInt("saas_vm_pe_count")
+  val saas_vm_ram = saasconfig.getInt("saas_vm_ram")
+  val saas_vm_bw = saasconfig.getInt("saas_vm_bw")
+  val saas_vm_size = saasconfig.getInt("saas_vm_size")
 
   // Type 1 cloudlet attributes
-  val saas_type1_cloudlet_pe_count = 1
-  val saas_type1_cloudlet_length = 1000
-  val saas_type1_cloudlet_file_size = 200
-  val saas_type1_cloudlet_output_size = 500
+  val saas_type1_cloudlet_pe_count = saasconfig.getInt("saas_type1_cloudlet_pe_count")
+  val saas_type1_cloudlet_length = saasconfig.getInt("saas_type1_cloudlet_length")
+  val saas_type1_cloudlet_file_size = saasconfig.getInt("saas_type1_cloudlet_file_size")
+  val saas_type1_cloudlet_output_size = saasconfig.getInt("saas_type1_cloudlet_output_size")
 
   // Type 2 cloudlet attributes
-  val saas_type2_cloudlet_pe_count = 2
-  val saas_type2_cloudlet_length = 500
+  val saas_type2_cloudlet_pe_count = saasconfig.getInt("saas_type2_cloudlet_pe_count")
+  val saas_type2_cloudlet_length = saasconfig.getInt("saas_type2_cloudlet_length")
 
   // Type 3 cloudlet attributes
-  val saas_type3_cloudlet_pe_count = 2
-  val saas_type3_cloudlet_length = 1000
-  val saas_type3_cloudlet_file_size = 200
-  val saas_type3_cloudlet_output_size = 500
+  val saas_type3_cloudlet_pe_count = saasconfig.getInt("saas_type3_cloudlet_pe_count")
+  val saas_type3_cloudlet_length = saasconfig.getInt("saas_type3_cloudlet_length")
+  val saas_type3_cloudlet_file_size = saasconfig.getInt("saas_type3_cloudlet_file_size")
+  val saas_type3_cloudlet_output_size = saasconfig.getInt("saas_type3_cloudlet_output_size")
 
   // Utilization
-  val saas_cloudlet_cpu_utilization = 0.8
-  val saas_cloudlet_ram_utilization = 0.5
-  val saas_cloudlet_bw_utilization = 0.3
-  val saas_cloudlet_initial_ram_utilization = 0.1
-  val saas_cloudlet_max_ram_utilization = 0.8
+  val saas_cloudlet_cpu_utilization = saasconfig.getDouble("saas_cloudlet_cpu_utilization")
+  val saas_cloudlet_ram_utilization = saasconfig.getDouble("saas_cloudlet_ram_utilization")
+  val saas_cloudlet_bw_utilization = saasconfig.getDouble("saas_cloudlet_bw_utilization")
+  val saas_cloudlet_initial_ram_utilization = saasconfig.getDouble("saas_cloudlet_initial_ram_utilization")
+  val saas_cloudlet_max_ram_utilization = saasconfig.getDouble("saas_cloudlet_max_ram_utilization")
 
   // cost - common
-  val saas_cost_per_sec = 0.001
-  val saas_cost_per_mem = 0.01
-  val saas_cost_per_storage = 0.0001
-  val saas_cost_per_bw = 0.01
+  val saas_cost_per_sec = saasconfig.getDouble("saas_cost_per_sec")
+  val saas_cost_per_mem = saasconfig.getDouble("saas_cost_per_mem")
+  val saas_cost_per_storage = saasconfig.getDouble("saas_cost_per_storage")
+  val saas_cost_per_bw = saasconfig.getDouble("saas_cost_per_bw")
 
   // scaling
   // horizontal scaling
-  val saas_cpu_overload_threshold = 0.8
+  val saas_cpu_overload_threshold = saasconfig.getDouble("saas_cpu_overload_threshold")
   // vertical ram scaling
-  val saas_ram_scaling_factor = 0.1
-  val saas_ram_upper_utilization_threshold = 0.8
-  val saas_ram_lower_utilization_threshold = 0.3
+  val saas_ram_scaling_factor = saasconfig.getDouble("saas_ram_scaling_factor")
+  val saas_ram_upper_utilization_threshold = saasconfig.getDouble("saas_ram_upper_utilization_threshold")
+  val saas_ram_lower_utilization_threshold = saasconfig.getDouble("saas_ram_lower_utilization_threshold")
 
   // allocation policy
-  val saasAllocationPolicyType = "SIMPLE"
+  val saasAllocationPolicyType = saasconfig.getString("saasAllocationPolicyType")
 
   // vm scheduling
-  val saasVmSchedulingType = "TIMESHARED"
+  val saasVmSchedulingType = saasconfig.getString("saasVmSchedulingType")
 
   // cloudlet scheduling
-  val saasCloudletSchedulingType = "TIMESHARED"
+  val saasCloudletSchedulingType = saasconfig.getString("saasCloudletSchedulingType")
 
 
   // PAAS VARIABLES
-  val paas_tree_size = 3
+  val paas_tree_size = treeNetworkConfig.getInt("tree_count")
 
-  val paas_hosts_count = 9
-  val paas_host_mips = 1000
-  val paas_host_pe_count = 4
-  val paas_host_ram = 16_384
-  val paas_host_bw = 1000
-  val paas_host_storage = 1_000_000l
+  val paas_hosts_count = paasconfig.getInt("paas_hosts_count")
+  val paas_host_mips = paasconfig.getInt("paas_host_mips")
+  val paas_host_pe_count = paasconfig.getInt("paas_host_pe_count")
+  val paas_host_ram = paasconfig.getInt("paas_host_ram")
+  val paas_host_bw = paasconfig.getInt("paas_host_bw")
+  val paas_host_storage = paasconfig.getInt("paas_host_storage")
 
-  val paas_vm_count = 18
-  val paas_vm_pe_count = 2
-  val paas_vm_ram = 4000
-  val paas_vm_bw = 1
-  val paas_vm_size = 20_000
+  val paas_vm_count = paasconfig.getInt("paas_vm_count")
+  val paas_vm_pe_count = paasconfig.getInt("paas_vm_pe_count")
+  val paas_vm_ram = paasconfig.getInt("paas_vm_ram")
+  val paas_vm_bw = paasconfig.getInt("paas_vm_bw")
+  val paas_vm_size = paasconfig.getInt("paas_vm_size")
 
   // Utilization
-  val paas_cloudlet_cpu_utilization = 0.8
-  val paas_cloudlet_ram_utilization = 0.5
-  val paas_cloudlet_bw_utilization = 0.3
-  val paas_cloudlet_initial_ram_utilization = 0.1
-  val paas_cloudlet_max_ram_utilization = 0.8
+  val paas_cloudlet_cpu_utilization = paasconfig.getDouble("paas_cloudlet_cpu_utilization")
+  val paas_cloudlet_ram_utilization = paasconfig.getDouble("paas_cloudlet_ram_utilization")
+  val paas_cloudlet_bw_utilization = paasconfig.getDouble("paas_cloudlet_bw_utilization")
+  val paas_cloudlet_initial_ram_utilization = paasconfig.getDouble("paas_cloudlet_initial_ram_utilization")
+  val paas_cloudlet_max_ram_utilization = paasconfig.getDouble("paas_cloudlet_max_ram_utilization")
 
   // cost
-  val paas_cost_per_sec = 0.001
-  val paas_cost_per_mem = 0.01
-  val paas_cost_per_storage = 0.0001
-  val paas_cost_per_bw = 0.01
+  val paas_cost_per_sec = paasconfig.getDouble("paas_cost_per_sec")
+  val paas_cost_per_mem = paasconfig.getDouble("paas_cost_per_mem")
+  val paas_cost_per_storage = paasconfig.getDouble("paas_cost_per_storage")
+  val paas_cost_per_bw = paasconfig.getDouble("paas_cost_per_bw")
 
   // scaling
   // horizontal scaling
-  val paas_cpu_overload_threshold = 0.8
+  val paas_cpu_overload_threshold = paasconfig.getDouble("paas_cpu_overload_threshold")
   // vertical ram scaling
-  val paas_ram_scaling_factor = 0.1
-  val paas_ram_upper_utilization_threshold = 0.8
-  val paas_ram_lower_utilization_threshold = 0.3
+  val paas_ram_scaling_factor = paasconfig.getDouble("paas_ram_scaling_factor")
+  val paas_ram_upper_utilization_threshold = paasconfig.getDouble("paas_ram_upper_utilization_threshold")
+  val paas_ram_lower_utilization_threshold = paasconfig.getDouble("paas_ram_lower_utilization_threshold")
 
   // allocation policy
-  val paasAllocationPolicyType = "SIMPLE"
+  val paasAllocationPolicyType = paasconfig.getString("paasAllocationPolicyType")
 
   // vm scheduling
-  val paasVmSchedulingType = "TIMESHARED"
+  val paasVmSchedulingType = paasconfig.getString("paasVmSchedulingType")
 
   // cloudlet scheduling
-  val paasCloudletSchedulingType = "TIMESHARED"
+  val paasCloudletSchedulingType = paasconfig.getString("paasCloudletSchedulingType")
 
   // IAAS Variables
-  val iaas_hosts_count = 9
-  val iaas_host_mips = 1000
-  val iaas_host_pe_count = 4
-  val iaas_host_ram = 16_384
-  val iaas_host_bw = 1000
-  val iaas_host_storage = 1_000_000l
+  val iaas_hosts_count = iaasconfig.getInt("iaas_hosts_count")
+  val iaas_host_mips = iaasconfig.getInt("iaas_host_mips")
+  val iaas_host_pe_count = iaasconfig.getInt("iaas_host_pe_count")
+  val iaas_host_ram = iaasconfig.getInt("iaas_host_ram")
+  val iaas_host_bw = iaasconfig.getInt("iaas_host_bw")
+  val iaas_host_storage = iaasconfig.getInt("iaas_host_storage")
 
-  val iaas_vm_count = 18
-  val iaas_vm_pe_count = 2
-  val iaas_vm_ram = 4000
-  val iaas_vm_bw = 1
-  val iaas_vm_size = 20_000
+  val iaas_vm_count = iaasconfig.getInt("iaas_vm_count")
+  val iaas_vm_pe_count = iaasconfig.getInt("iaas_vm_pe_count")
+  val iaas_vm_ram = iaasconfig.getInt("iaas_vm_ram")
+  val iaas_vm_bw = iaasconfig.getInt("iaas_vm_bw")
+  val iaas_vm_size = iaasconfig.getInt("iaas_vm_size")
 
   // Utilization
-  val iaas_cloudlet_cpu_utilization = 0.8
-  val iaas_cloudlet_ram_utilization = 0.5
-  val iaas_cloudlet_bw_utilization = 0.3
-  val iaas_cloudlet_initial_ram_utilization = 0.1
-  val iaas_cloudlet_max_ram_utilization = 0.8
+  val iaas_cloudlet_cpu_utilization = iaasconfig.getDouble("iaas_cloudlet_cpu_utilization")
+  val iaas_cloudlet_ram_utilization = iaasconfig.getDouble("iaas_cloudlet_ram_utilization")
+  val iaas_cloudlet_bw_utilization = iaasconfig.getDouble("iaas_cloudlet_bw_utilization")
+  val iaas_cloudlet_initial_ram_utilization = iaasconfig.getDouble("iaas_cloudlet_initial_ram_utilization")
+  val iaas_cloudlet_max_ram_utilization = iaasconfig.getDouble("iaas_cloudlet_max_ram_utilization")
 
   // cost
-  val iaas_cost_per_sec = 0.001
-  val iaas_cost_per_mem = 0.01
-  val iaas_cost_per_storage = 0.0001
-  val iaas_cost_per_bw = 0.01
+  val iaas_cost_per_sec = iaasconfig.getDouble("iaas_cost_per_sec")
+  val iaas_cost_per_mem = iaasconfig.getDouble("iaas_cost_per_mem")
+  val iaas_cost_per_storage = iaasconfig.getDouble("iaas_cost_per_storage")
+  val iaas_cost_per_bw = iaasconfig.getDouble("iaas_cost_per_bw")
 
   // allocation policy
-  val iaasAllocationPolicyType = "SIMPLE"
+  val iaasAllocationPolicyType = iaasconfig.getString("iaasAllocationPolicyType")
 
   // vm scheduling
-  val iaasVmSchedulingType = "TIMESHARED"
+  val iaasVmSchedulingType = iaasconfig.getString("iaasVmSchedulingType")
 
   // cloudlet scheduling
-  val iaasCloudletSchedulingType = "TIMESHARED"
+  val iaasCloudletSchedulingType = iaasconfig.getString("iaasCloudletSchedulingType")
 
   // FAAS Variables
-  val faas_hosts_count = 9
-  val faas_host_mips = 1000
-  val faas_host_pe_count = 4
-  val faas_host_ram = 8000
-  val faas_host_bw = 1000
-  val faas_host_storage = 100000
+  val faas_hosts_count = faasconfig.getInt("faas_hosts_count")
+  val faas_host_mips = faasconfig.getInt("faas_host_mips")
+  val faas_host_pe_count = faasconfig.getInt("faas_host_pe_count")
+  val faas_host_ram = faasconfig.getInt("faas_host_ram")
+  val faas_host_bw = faasconfig.getInt("faas_host_bw")
+  val faas_host_storage = faasconfig.getInt("faas_host_storage")
 
-  val faas_vm_count = 36
-  val faas_vm_pe_count = 1
-  val faas_vm_ram = 512
-  val faas_vm_bw = 1
-  val faas_vm_size = 512
+  val faas_vm_count = faasconfig.getInt("faas_vm_count")
+  val faas_vm_pe_count = faasconfig.getInt("faas_vm_pe_count")
+  val faas_vm_ram = faasconfig.getInt("faas_vm_ram")
+  val faas_vm_bw = faasconfig.getInt("faas_vm_bw")
+  val faas_vm_size = faasconfig.getInt("faas_vm_size")
 
-  val faas_max_cloudlet_length = 500
-  val faas_max_cloudlet_pe = 1
-  val faas_max_cloudlet_file_size = 200
-  val faas_max_cloudlet_output_file_size = 200
+  val faas_max_cloudlet_length = faasconfig.getInt("faas_max_cloudlet_length")
+  val faas_max_cloudlet_pe = faasconfig.getInt("faas_max_cloudlet_pe")
+  val faas_max_cloudlet_file_size = faasconfig.getInt("faas_max_cloudlet_file_size")
+  val faas_max_cloudlet_output_file_size = faasconfig.getInt("faas_max_cloudlet_output_file_size")
 
   // Utilization
-  val faas_cloudlet_cpu_utilization = 0.8
-  val faas_cloudlet_ram_utilization = 0.5
-  val faas_cloudlet_bw_utilization = 0.3
-  val faas_cloudlet_initial_ram_utilization = 0.1
-  val faas_cloudlet_max_ram_utilization = 0.8
+  val faas_cloudlet_cpu_utilization = faasconfig.getDouble("faas_cloudlet_cpu_utilization")
+  val faas_cloudlet_ram_utilization = faasconfig.getDouble("faas_cloudlet_ram_utilization")
+  val faas_cloudlet_bw_utilization = faasconfig.getDouble("faas_cloudlet_bw_utilization")
+  val faas_cloudlet_initial_ram_utilization = faasconfig.getDouble("faas_cloudlet_initial_ram_utilization")
+  val faas_cloudlet_max_ram_utilization = faasconfig.getDouble("faas_cloudlet_max_ram_utilization")
 
   // scaling
   // horizontal scaling
-  val faas_cpu_overload_threshold = 0.8
+  val faas_cpu_overload_threshold = faasconfig.getDouble("faas_cpu_overload_threshold")
   // vertical ram scaling
-  val faas_ram_scaling_factor = 0.1
-  val faas_ram_upper_utilization_threshold = 0.8
-  val faas_ram_lower_utilization_threshold = 0.3
+  val faas_ram_scaling_factor = faasconfig.getDouble("faas_ram_scaling_factor")
+  val faas_ram_upper_utilization_threshold = faasconfig.getDouble("faas_ram_upper_utilization_threshold")
+  val faas_ram_lower_utilization_threshold = faasconfig.getDouble("faas_ram_lower_utilization_threshold")
 
   // cost
-  val faas_cost_per_sec = 0.001
-  val faas_cost_per_mem = 0.01
-  val faas_cost_per_storage = 0.0001
-  val faas_cost_per_bw = 0.01
+  val faas_cost_per_sec = faasconfig.getDouble("faas_cost_per_sec")
+  val faas_cost_per_mem = faasconfig.getDouble("faas_cost_per_mem")
+  val faas_cost_per_storage = faasconfig.getDouble("faas_cost_per_storage")
+  val faas_cost_per_bw = faasconfig.getDouble("faas_cost_per_bw")
 
   // allocation policy
-  val faasAllocationPolicyType = "SIMPLE"
+  val faasAllocationPolicyType = faasconfig.getString("faasAllocationPolicyType")
 
   // vm scheduling
-  val faasVmSchedulingType = "TIMESHARED"
+  val faasVmSchedulingType = faasconfig.getString("faasVmSchedulingType")
 
   // cloudlet scheduling
-  val faasCloudletSchedulingType = "TIMESHARED"
+  val faasCloudletSchedulingType = faasconfig.getString("faasCloudletSchedulingType")
 
 
   def requestSaaSSimulation(simulation: CloudSim, broker: DatacenterBroker, numberOfCloudlet: Int, cloudletType: SaaSCloudletType): Unit =
