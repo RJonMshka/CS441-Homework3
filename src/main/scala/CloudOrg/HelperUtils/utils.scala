@@ -228,18 +228,9 @@ object utils {
       .setUtilizationModelBw(UtilizationModelDynamic(btwUtilization))
       .setUtilizationModelCpu(UtilizationModelDynamic(cpuUtilization))
 
-  /**
-   *
-   * @param cloudlet
-   * @param fileSize   - bytes
-   * @param outputSize - bytes
-   */
   def cloudletSetSize(cloudlet: Cloudlet, fileSize: Long, outputSize: Long): Cloudlet =
     cloudlet.setFileSize(fileSize)
       .setOutputSize(outputSize)
-
-  def cloudletSetCommonSize(cloudlet: Cloudlet, commonSize: Long): Cloudlet =
-    cloudlet.setSizes(commonSize)
 
   def setPowerModelForHost(host: Host): Unit =
     val powerModel = PowerModelHostSimple(MAX_POWER, STATIC_POWER)
