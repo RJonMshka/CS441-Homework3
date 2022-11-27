@@ -22,6 +22,7 @@ import org.cloudbus.cloudsim.vms.network.NetworkVm
 import org.cloudbus.cloudsim.vms.{Vm, VmCost, VmSimple}
 import org.cloudbus.cloudsim.schedulers.vm.{VmScheduler, VmSchedulerSpaceShared, VmSchedulerTimeShared}
 import org.cloudsimplus.autoscaling.{HorizontalVmScalingSimple, VerticalVmScalingSimple}
+import org.cloudsimplus.builders.tables.CloudletsTableBuilder
 import org.cloudsimplus.heuristics.CloudletToVmMappingSimulatedAnnealing
 import org.slf4j.Logger
 
@@ -392,4 +393,14 @@ object utils {
       case "BESTFIT" => VmAllocationPolicyBestFit()
       case "ROUNDROBIN" => VmAllocationPolicyRoundRobin()
       case _ => VmAllocationPolicySimple()
+
+  def buildTableAndPrintResults(broker: DatacenterBroker, vmList: util.List[? <: Vm], hostList: util.List[? <: Host]): Unit =
+    logger.info("<---------- CLOUDLET PERFORMANCE TABLE ------->")
+    CloudletsTableBuilder(broker.getCloudletFinishedList).build
+    logger.info("<---------- HOSTS POWER AND CPU CONSUMPTION ------->")
+    hostList.asScala.foreach(printHostPowerConsumptionAndCpuUtilization)
+    logger.info("<---------- VMS POWER AND CPU CONSUMPTION ------->")
+    vmList.asScala.foreach(printVmPowerConsumptionAndCpuUtilization)
+    logger.info("<-------- RESOURCE BILLING INFORMATION ------------------>")
+    printTotalCostForVms(broker)
 }

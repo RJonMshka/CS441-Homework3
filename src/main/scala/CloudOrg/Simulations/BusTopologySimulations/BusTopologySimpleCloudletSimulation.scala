@@ -80,19 +80,10 @@ object BusTopologySimpleCloudletSimulation {
       utils.createVerticalRamScalingForVm(vm, ram_scaling_factor, ram_upper_utilization_threshold, ram_lower_utilization_threshold)
     })
     val cloudletList = utils.createCloudletList(cloudlet_count, cloudlet_length, cloudlet_pe_count, cloudlet_cpu_utilization, cloudlet_initial_ram_utilization, cloudlet_max_ram_utilization, cloudlet_bw_utilization)
-
+    // submit vms, cloudlets, performs simulation and prints the result
     broker.submitVmList(vmList)
     broker.submitCloudletList(cloudletList)
-
     simulation.start
-
-    val finishedCloudlets = broker.getCloudletFinishedList
-    CloudletsTableBuilder(finishedCloudlets).build
-    logger.info("<---------- HOSTS POWER AND CPU CONSUMPTION ------->")
-    hostList.asScala.foreach(utils.printHostPowerConsumptionAndCpuUtilization)
-    logger.info("<---------- VMS POWER AND CPU CONSUMPTION ------->")
-    vmList.asScala.foreach(utils.printVmPowerConsumptionAndCpuUtilization)
-    logger.info("<-------- RESOURCE BILLING INFORMATION ------------------>")
-    utils.printTotalCostForVms(broker)
+    utils.buildTableAndPrintResults(broker, vmList, hostList)
   }
 }

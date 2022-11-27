@@ -92,18 +92,10 @@ object TreeTopologyMapReduceSimulation {
     Range(0, app_count).map(i => {
       MapReduceJob.createMapReduceTasks(randomCloudlets(app_cloudlet_count * i), randomCloudlets((app_cloudlet_count * i) + 1), randomCloudlets((app_cloudlet_count * i) + 2), randomCloudlets((app_cloudlet_count * i) + 3))
     })
+    // submit vms, cloudlets, performs simulation and prints the result
     broker.submitVmList(vmList)
     broker.submitCloudletList(cloudletList)
-
     simulation.start
-
-    val finishedCloudlets = broker.getCloudletFinishedList
-    CloudletsTableBuilder(finishedCloudlets).build
-    logger.info("<---------- HOSTS POWER AND CPU CONSUMPTION ------->")
-    hostList.asScala.foreach(utils.printHostPowerConsumptionAndCpuUtilization)
-    logger.info("<---------- VMS POWER AND CPU CONSUMPTION ------->")
-    vmList.asScala.foreach(utils.printVmPowerConsumptionAndCpuUtilization)
-    logger.info("<-------- RESOURCE BILLING INFORMATION ------------------>")
-    utils.printTotalCostForVms(broker)
+    utils.buildTableAndPrintResults(broker, vmList, hostList)
   }
 }
