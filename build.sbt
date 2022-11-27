@@ -1,3 +1,4 @@
+
 ThisBuild / version := "1.0.0-cloudOrgSimulator"
 
 ThisBuild / scalaVersion := "3.2.1"
@@ -24,3 +25,8 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % scalacticVersion % Test,
   "org.scalatest" %% "scalatest-featurespec" % scalacticVersion % Test
 )
+
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}

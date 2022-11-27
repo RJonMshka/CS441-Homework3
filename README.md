@@ -6,6 +6,7 @@
 
 ---
 ## Introduction
+
 This homework involves demonstration of creating different cloud organizations using CloudSimPlus (a framework for simulation of cloud infrastructure and its properties with great accuracy).
 The tasks for this homework includes creating different cloud architectures with changing properties and assigned workload to conclude which architecture is best for certain circumstances.
 Also, SAAS(Software as a Service), PAAS(Platform as a service), IAAS (Infrastructure as a Service) and FAAS(Function as a service) models have also been simulated upto some extend with project specific constraints.
@@ -14,6 +15,27 @@ All of these tasks are described in the later sections of this documentation.
 
 
 ## How to run the application
+1. Download IntelliJ or your favourite IDE. The application is developed using IntelliJ IDE, and it is highly recommended to use it for various reasons.
+2. Make sure you have Java SDK version 18 installed on your machine.
+3. Also, it is assumed that your machine have git (version control) installed on your machine. If not, please do.
+4. Clone this repository from GitHub and switch to `main` branch. This is where the latest code is located.
+5. Open IntelliJ, and open up this project in the IDE environment. Or you can do `New - Project from Version Control` and then enter the GitHub URL of this repository to load in directly into your system if not cloned already.
+6. The application's code is written using Scala programming language. The version used for Scala is `3.2.1`.
+7. For building the project, `sbt` (Scala's Simple Build Tool) is used. Version `1.8.0` is used for sbt.
+8. All the dependencies and build setting can be found in `build.sbt` file.
+9. Once intelliJ is successfully detected the Scala, sbt, and right versions for both of them, the project is ready to be compiled/built.
+10. Go to terminal at the bottom of IntelliJ, or open any terminal with path being set to the project's root directory.
+11. Enter `sbt clean compile`, the project will start building.
+12. Test cases are written using a library called `ScalaTest`.
+13. All the test cases are in `src/test/scala/CloudOrgSimulationTest.scala.scala` file. You can even add your own test cases to test the application even more.
+14. You can run the tests using `sbt test` to see the if all test cases pass or not. As of the moment this documentation is written and probably the time when you will be testing, all the test cases will pass (hopefully).
+15. 17. Please make sure your machine have `java version 17` or above because cloud sim only works with those versions. If not, please use sbt shell instead and enter `test`.
+16. To run the application, do `sbt run` if you have the correct java version, otherwise use sbt shell again and type `run`. It will all the simulations in `src/main/scala/CloudOrg/RunSimulations.scala` file. 
+17. If you want to see individual simulation or add other simulation, comment out some and run accordingly. The code there is pretty intuitive.
+18. Finally, run `sbt assembly` or `sbt clean compile assembly` if you want to merge the compilation and generating fat jar step together.
+19. The `sbt assembly` command will generate a fat jar file that will contain your application's byte code as well as the code from dependencies that the application is importing.
+20. The jar file will be generating in `target/scala-3.2.1/` directory with name `CS441-Homework3-assembly-1.0.0-cloudOrgSimulator.jar`.
+21. That's it, this jar file can be deployed in a container using docker and dockerhub.
 
 
 ---

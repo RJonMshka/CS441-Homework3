@@ -1,5 +1,3 @@
-[debug] not up to date. inChanged = true, force = false
-[debug] Updating ProjectRef(uri("file:/C:/Rajat/Rajat%20UIC%20transfer/study%20stuff/CS%20441%20-%20CLoud%20Computing%20Objects/Projects/CS441-Homework3/project/"), "cs441-homework3-build")...
-[warn] Unrecognized repository Scala Plugin Bundled Repository, ignoring it
-[warn] Unrecognized repository Scala Plugin Bundled Repository, ignoring it
-[debug] Done updating ProjectRef(uri("file:/C:/Rajat/Rajat%20UIC%20transfer/study%20stuff/CS%20441%20-%20CLoud%20Computing%20Objects/Projects/CS441-Homework3/project/"), "cs441-homework3-build")
+[0m[[0m[0mdebug[0m] [0m[0mnot up to date. inChanged = true, force = false[0m
+[0m[[0m[0mdebug[0m] [0m[0mUpdating ProjectRef(uri("file:/C:/Rajat/Rajat%20UIC%20transfer/study%20stuff/CS%20441%20-%20CLoud%20Computing%20Objects/Projects/CS441-Homework3/project/"), "cs441-homework3-build")...[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone updating ProjectRef(uri("file:/C:/Rajat/Rajat%20UIC%20transfer/study%20stuff/CS%20441%20-%20CLoud%20Computing%20Objects/Projects/CS441-Homework3/project/"), "cs441-homework3-build")[0m
