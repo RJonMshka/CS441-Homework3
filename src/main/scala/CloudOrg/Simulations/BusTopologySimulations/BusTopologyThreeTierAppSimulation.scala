@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object BusTopologyThreeTierAppSimulation {
   val logger = CreateLogger(classOf[BusTopologyThreeTierAppSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Three Tier App jobs on Bus Network Datacenter")
     CommonTopologyThreeTierSimulation.startSimulation(utils.NetworkDatacenterType.BUS)
 }

@@ -33,8 +33,4 @@ object PaaSSimulation {
     val broker = DatacenterBrokerSimple(simulation)
     CustomDatacenterService.requestThreeTierPaaSService(simulation, broker, threeTierAppInstances, executionLength, threeTierAppPeConsumption)
 
-  def main(args: Array[String]): Unit = {
-    threeTierPaaSSimulation()
-  }
-
 }

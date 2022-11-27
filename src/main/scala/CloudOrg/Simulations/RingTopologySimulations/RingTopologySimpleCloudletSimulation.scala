@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters.*
 object RingTopologySimpleCloudletSimulation {
   val logger = CreateLogger(classOf[RingTopologySimpleCloudletSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Simple cloudlets on Ring Network Datacenter")
     CommonTopologySimpleCloudletSimulation.startSimulation(utils.NetworkDatacenterType.RING)
 }

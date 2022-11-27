@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object HybridTopologyThreeTierAppSimulation {
   val logger = CreateLogger(classOf[HybridTopologyThreeTierAppSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Three Tier App jobs on Hybrid Network Datacenter")
     CommonTopologyThreeTierSimulation.startSimulation(utils.NetworkDatacenterType.HYBRID)
 }

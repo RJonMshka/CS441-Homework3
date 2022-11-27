@@ -13,7 +13,7 @@ import scala.jdk.CollectionConverters.*
 object BusTopologySimpleCloudletSimulation {
   val logger = CreateLogger(classOf[BusTopologySimpleCloudletSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Simple cloudlets on Bus Network Datacenter")
     CommonTopologySimpleCloudletSimulation.startSimulation(utils.NetworkDatacenterType.BUS)
 }

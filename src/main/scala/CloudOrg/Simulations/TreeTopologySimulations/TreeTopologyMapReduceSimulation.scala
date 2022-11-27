@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object TreeTopologyMapReduceSimulation {
   val logger = CreateLogger(classOf[TreeTopologyMapReduceSimulation.type])
 
-  def main(args: Array[String]): Unit = {
+  def startSimulation(): Unit = {
     logger.info("Starting simulation for Map Reduce Job on Tree Network Datacenter")
     CommonTopologyMapReduceSimulation.startSimulation(utils.NetworkDatacenterType.TREE)
   }

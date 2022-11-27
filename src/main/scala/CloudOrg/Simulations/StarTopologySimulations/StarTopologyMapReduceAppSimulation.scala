@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters.*
 object StarTopologyMapReduceAppSimulation {
   val logger = CreateLogger(classOf[StarTopologyMapReduceAppSimulation.type])
 
-  def main(args: Array[String]): Unit = {
+  def startSimulation(): Unit = {
     logger.info("Starting simulation for Map Reduce Job on Star Network Datacenter")
     CommonTopologyMapReduceSimulation.startSimulation(utils.NetworkDatacenterType.STAR)
   }

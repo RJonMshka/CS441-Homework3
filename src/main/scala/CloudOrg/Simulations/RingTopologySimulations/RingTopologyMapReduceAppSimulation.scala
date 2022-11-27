@@ -16,7 +16,7 @@ object RingTopologyMapReduceAppSimulation {
   val logger = CreateLogger(classOf[RingTopologyMapReduceAppSimulation.type])
 
 
-  def main(args: Array[String]): Unit = {
+  def startSimulation(): Unit = {
     logger.info("Starting simulation for Map Reduce Job on Ring Network Datacenter")
     CommonTopologyMapReduceSimulation.startSimulation(utils.NetworkDatacenterType.RING)
   }

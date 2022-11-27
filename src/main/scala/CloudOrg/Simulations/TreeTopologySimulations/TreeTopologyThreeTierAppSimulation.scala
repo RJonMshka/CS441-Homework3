@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object TreeTopologyThreeTierAppSimulation {
   val logger = CreateLogger(classOf[TreeTopologyThreeTierAppSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Three Tier App jobs on Tree Network Datacenter")
     CommonTopologyThreeTierSimulation.startSimulation(utils.NetworkDatacenterType.TREE)
 }

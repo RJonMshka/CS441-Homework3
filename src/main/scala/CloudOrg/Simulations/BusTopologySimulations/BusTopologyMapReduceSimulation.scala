@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object BusTopologyMapReduceSimulation {
   val logger = CreateLogger(classOf[BusTopologyMapReduceSimulation.type])
 
-  def main(args: Array[String]): Unit =
+  def startSimulation(): Unit =
     logger.info("Starting simulation for Map Reduce Job on Bus Network Datacenter")
     CommonTopologyMapReduceSimulation.startSimulation(utils.NetworkDatacenterType.BUS)
 }

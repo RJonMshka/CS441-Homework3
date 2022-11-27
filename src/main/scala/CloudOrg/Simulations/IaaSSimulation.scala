@@ -91,9 +91,5 @@ object IaaSSimulation {
       simpleRamLowerThreshold
     )
 
-  def main(args: Array[String]): Unit = {
-    iaaSMapReduceAppSimulation()
-  }
-
 
 }

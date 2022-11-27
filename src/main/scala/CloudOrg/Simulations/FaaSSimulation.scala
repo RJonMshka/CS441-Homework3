@@ -28,8 +28,4 @@ object FaaSSimulation {
       faasCloudletSize,
       faasCloudletOutputSize
     )
-
-  def main(args: Array[String]): Unit = {
-    faaSSimulation()
-  }
 }

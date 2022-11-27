@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.*
 object HybridTopologyMapReduceSimulation {
   val logger = CreateLogger(classOf[HybridTopologyMapReduceSimulation.type])
 
-  def main(args: Array[String]): Unit = {
+  def startSimulation(): Unit = {
     logger.info("Starting simulation for Map Reduce Job on Hybrid Network Datacenter")
     CommonTopologyMapReduceSimulation.startSimulation(utils.NetworkDatacenterType.HYBRID)
   }
