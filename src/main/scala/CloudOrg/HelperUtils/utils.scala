@@ -14,8 +14,8 @@ import org.cloudbus.cloudsim.network.topologies.BriteNetworkTopology
 import org.cloudbus.cloudsim.power.models.PowerModelHostSimple
 import org.cloudbus.cloudsim.provisioners.ResourceProvisionerSimple
 import org.cloudbus.cloudsim.resources.{Pe, PeSimple, Ram}
-import org.cloudbus.cloudsim.schedulers.cloudlet.{CloudletSchedulerSpaceShared, CloudletSchedulerTimeShared}
-import org.cloudbus.cloudsim.schedulers.vm.{VmSchedulerSpaceShared, VmSchedulerTimeShared}
+import org.cloudbus.cloudsim.schedulers.cloudlet.{CloudletSchedulerSpaceShared, CloudletSchedulerTimeShared, CloudletScheduler, CloudletSchedulerCompletelyFair}
+import org.cloudbus.cloudsim.schedulers.vm.{VmSchedulerSpaceShared, VmSchedulerTimeShared, VmScheduler}
 import org.cloudbus.cloudsim.utilizationmodels.{UtilizationModelDynamic, UtilizationModelFull}
 import org.cloudbus.cloudsim.vms.network.NetworkVm
 import org.cloudbus.cloudsim.vms.{Vm, VmCost, VmSimple}
@@ -42,12 +42,6 @@ object utils {
   val HOST_SHUTDOWN_POWER = 5
 
   val randomAllocationPolicySeed = 40
-
-  enum SchedulerType:
-    case TIMESHARED, SPACESHARED
-
-  enum AllocationPolicyType:
-    case SIMPLE, BESTFIT, RANDOM, ROUNDROBIN
 
   enum NetworkDatacenterType:
     case STAR, TREE, RING, BUS, HYBRID, NORMAL
@@ -83,22 +77,22 @@ object utils {
     Range(0, pes).map(_ => PeSimple(mips)).toList.asJava
 
 
-  def createHostList(hosts: Int, hostPes: Int, hostMips: Long, hostRam: Long, hostBw: Long, hostStorage: Long, vmScheduler: SchedulerType): util.List[Host] =
+  def createHostList(hosts: Int, hostPes: Int, hostMips: Long, hostRam: Long, hostBw: Long, hostStorage: Long, vmScheduler: String): util.List[Host] =
     Range(0, hosts).map(i => {
       val host = createHost(hostPes, hostMips, hostRam, hostBw, hostStorage)
       setPowerModelForHost(host)
-      setVmSchedulerForHost(host, vmScheduler)
+      host.setVmScheduler(getVmSchedulingPolicy(vmScheduler))
       host.enableUtilizationStats
       host.setRamProvisioner(ResourceProvisionerSimple()).setBwProvisioner(ResourceProvisionerSimple())
       host.setId(i)
       host
     }).toList.asJava
 
-  def createNwHostList(hosts: Int, hostPes: Int, hostMips: Long, hostRam: Long, hostBw: Long, hostStorage: Long, vmScheduler: SchedulerType): util.List[NetworkHost] =
+  def createNwHostList(hosts: Int, hostPes: Int, hostMips: Long, hostRam: Long, hostBw: Long, hostStorage: Long, vmScheduler: String): util.List[NetworkHost] =
     Range(0, hosts).map(i => {
       val host = createNwHost(hostPes, hostMips, hostRam, hostBw, hostStorage)
       setPowerModelForHost(host)
-      setVmSchedulerForHost(host, vmScheduler)
+      host.setVmScheduler(getVmSchedulingPolicy(vmScheduler))
       host.enableUtilizationStats
       host.setRamProvisioner(ResourceProvisionerSimple()).setBwProvisioner(ResourceProvisionerSimple())
       host.setId(i)
@@ -119,12 +113,12 @@ object utils {
   def createNwVm(mipsCapacity: Long, peCount: Int): NetworkVm =
     NetworkVm(mipsCapacity, peCount)
 
-  def createVm(mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): Vm =
+  def createVm(mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String): Vm =
     val vm = VmSimple(mipsCapacity, peCount)
     setVmCharacteristics(vm, vmRam, vmBw, vmSize, cloudletScheduler)
     vm
 
-  def createNwVm(mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): NetworkVm =
+  def createNwVm(mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String): NetworkVm =
     val vm = NetworkVm(mipsCapacity, peCount)
     setVmCharacteristics(vm, vmRam, vmBw, vmSize, cloudletScheduler)
     vm
@@ -135,16 +129,14 @@ object utils {
   def createNwVmList(vmCount: Int, mipsCapacity: Long, peCount: Int): util.List[NetworkVm] =
     Range(0, vmCount).map(_ => createNwVm(mipsCapacity, peCount)).toList.asJava
 
-  def createNwVmList(vmCount: Int, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): util.List[NetworkVm] =
+  def createNwVmList(vmCount: Int, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String): util.List[NetworkVm] =
     Range(0, vmCount).map(_ => createNwVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)).toList.asJava
 
-  def createVmList(vmCount: Int, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): util.List[Vm] =
+  def createVmList(vmCount: Int, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String): util.List[Vm] =
     Range(0, vmCount).map(_ => createVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)).toList.asJava
 
-  def setVmCharacteristics(vm: Vm, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType): Vm =
-    cloudletScheduler match
-      case SchedulerType.TIMESHARED => vm.setCloudletScheduler(CloudletSchedulerTimeShared())
-      case SchedulerType.SPACESHARED => vm.setCloudletScheduler(CloudletSchedulerSpaceShared())
+  def setVmCharacteristics(vm: Vm, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String): Vm =
+    vm.setCloudletScheduler(getCloudletSchedulingPolicy(cloudletScheduler))
     vm.enableUtilizationStats
     vm.setRam(vmRam).setBw(vmBw).setSize(vmSize)
 
@@ -288,11 +280,6 @@ object utils {
       f"Host ${host.getId}%2d | PE Amount: ${host.getNumberOfPes}%2d | MIPS by PE: ${mipsByPe}%1.0f | Mean CPU Usage is: ${utilPercentMean * 100.0}%4.1f%% | Power Consumption mean is: ${powerCons}%4.0f Watt"
     )
 
-  def setVmSchedulerForHost(host: Host, schedulerType: SchedulerType): Host =
-    schedulerType match
-      case SchedulerType.TIMESHARED => host.setVmScheduler(VmSchedulerTimeShared())
-      case SchedulerType.SPACESHARED => host.setVmScheduler(VmSchedulerSpaceShared())
-
   def setDatacenterCost(datacenter: Datacenter, costPerSec: Double, costPerMemAccess: Double, costPerStorage: Double, costPerBw: Double): Unit =
     datacenter.getCharacteristics
       .setCostPerSecond(costPerSec)
@@ -310,9 +297,9 @@ object utils {
 
   def horizontalVmScalingOutPredicate(vm: Vm, utilizationThreshold: Double): Boolean = vm.getCpuPercentUtilization > utilizationThreshold
 
-  def createHorizontalVmScaling(vm: Vm, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: SchedulerType, overloadingThreshold: Double): Unit =
+  def createHorizontalVmScaling(vm: Vm, mipsCapacity: Long, peCount: Int, vmRam: Long, vmBw: Long, vmSize: Long, cloudletScheduler: String, overloadingThreshold: Double): Unit =
     val horizontalVmScaling = HorizontalVmScalingSimple()
-    val createVm = new Supplier[Vm] :
+    val createVm = new Supplier[Vm]:
       override def get(): Vm = vm match
         case v: NetworkVm => utils.createNwVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)
         case _ => utils.createVm(mipsCapacity, peCount, vmRam, vmBw, vmSize, cloudletScheduler)
@@ -376,6 +363,23 @@ object utils {
       case "BESTFIT" => VmAllocationPolicyBestFit()
       case "ROUNDROBIN" => VmAllocationPolicyRoundRobin()
       case _ => VmAllocationPolicySimple()
+
+  def getVmSchedulingPolicy(schedulingPolicy: String): VmScheduler =
+    schedulingPolicy match
+      case "TIMESHARED" => VmSchedulerTimeShared()
+      case "SPACESHARED" => VmSchedulerSpaceShared()
+      case "RANDOM" => VmSchedulerSpaceShared()
+      case "PSEUDORANDOM" => VmSchedulerSpaceShared()
+      case _ => VmSchedulerSpaceShared()
+
+  def getCloudletSchedulingPolicy(schedulingPolicy: String): CloudletScheduler =
+    schedulingPolicy match
+      case "TIMESHARED" => CloudletSchedulerTimeShared()
+      case "SPACESHARED" => CloudletSchedulerSpaceShared()
+      case "RANDOM" => CloudletSchedulerSpaceShared()
+      case "PSEUDORANDOM" => CloudletSchedulerSpaceShared()
+      case "FAIR" => CloudletSchedulerCompletelyFair()
+      case _ => CloudletSchedulerSpaceShared()
 
   def buildTableAndPrintResults(broker: DatacenterBroker, vmList: util.List[? <: Vm], hostList: util.List[? <: Host]): Unit =
     logger.info("<---------- CLOUDLET PERFORMANCE TABLE ------->")

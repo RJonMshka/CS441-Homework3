@@ -26,11 +26,16 @@ object BasicSimulation {
   val cloudlet_file_size = 200
   val cloudlet_output_size = 500
 
+  // datacenter allocation Policy
+  val allocationPolicyType = "SIMPLE"
+  // vm scheduling policy
+  val vmSchedulerType = "TIMESHARED"
+
   def main(args: Array[String]): Unit = {
     val simulation:CloudSim = CloudSim()
     val broker: DatacenterBroker = utils.createBroker(simulation)
-    val hostList = utils.createHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    DatacenterSimple(simulation, hostList)
+    val hostList = utils.createHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
+    DatacenterSimple(simulation, hostList, utils.getAllocationPolicy(allocationPolicyType))
     val vmList = utils.createVmList(vm_count, host_mips, vm_pe_count)
     val cloudletList = utils.createCloudletList(cloudlet_count, cloudlet_length, cloudlet_pe_count)
 

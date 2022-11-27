@@ -225,17 +225,17 @@ object CustomDatacenterService {
 
 
   def requestSaaSSimulation(simulation: CloudSim, broker: DatacenterBroker, numberOfCloudlet: Int, cloudletType: SaaSCloudletType): Unit =
-    val hostList = utils.createNwHostList(saas_hosts_count, saas_host_pe_count, saas_host_mips, saas_host_ram, saas_host_bw, saas_host_storage, utils.SchedulerType.TIMESHARED)
+    val hostList = utils.createNwHostList(saas_hosts_count, saas_host_pe_count, saas_host_mips, saas_host_ram, saas_host_bw, saas_host_storage, saasVmSchedulingType)
 
     val allocationPolicy = utils.getAllocationPolicy(saasAllocationPolicyType)
     // We will be using star network datacenter for SAAS Simulations
-    val datacenter = StarNetworkDatacenter(simulation, hostList, allocationPolicy)
+    val datacenter = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList, allocationPolicy, paas_tree_size)
 
     utils.setDatacenterCost(datacenter, saas_cost_per_sec, saas_cost_per_mem, saas_cost_per_storage, saas_cost_per_bw)
 
-    val vmList = utils.createNwVmList(saas_vm_count, saas_host_mips, saas_vm_pe_count, saas_vm_ram, saas_vm_bw, saas_vm_size, utils.SchedulerType.SPACESHARED)
+    val vmList = utils.createNwVmList(saas_vm_count, saas_host_mips, saas_vm_pe_count, saas_vm_ram, saas_vm_bw, saas_vm_size, saasCloudletSchedulingType)
     vmList.asScala.foreach(vm => {
-      utils.createHorizontalVmScaling(vm, saas_host_mips, saas_vm_pe_count, saas_vm_ram, saas_vm_bw, saas_vm_size, utils.SchedulerType.SPACESHARED, saas_cpu_overload_threshold)
+      utils.createHorizontalVmScaling(vm, saas_host_mips, saas_vm_pe_count, saas_vm_ram, saas_vm_bw, saas_vm_size, saasCloudletSchedulingType, saas_cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, saas_ram_scaling_factor, saas_ram_upper_utilization_threshold, saas_ram_lower_utilization_threshold)
     })
 
@@ -251,17 +251,17 @@ object CustomDatacenterService {
     utils.buildTableAndPrintResults(broker, vmList, hostList)
   
   def requestMapReducePaaSSimulation(simulation: CloudSim, broker: DatacenterBroker, numberOfAppCloudlets: Int, cloudletLength: Int, cloudletPe: Int): Unit =
-    val hostList = utils.createNwHostList(paas_hosts_count, paas_host_pe_count, paas_host_mips, paas_host_ram, paas_host_bw, paas_host_storage, utils.SchedulerType.TIMESHARED)
+    val hostList = utils.createNwHostList(paas_hosts_count, paas_host_pe_count, paas_host_mips, paas_host_ram, paas_host_bw, paas_host_storage, paasVmSchedulingType)
 
     val allocationPolicy = utils.getAllocationPolicy(paasAllocationPolicyType)
     // We will be using tree network datacenter for PAAS Simulations
-    val datacenter = TreeNetworkDatacenter(simulation, hostList, allocationPolicy, paas_tree_size)
+    val datacenter = utils.createNwDatacenter(utils.NetworkDatacenterType.TREE, simulation, hostList, allocationPolicy, paas_tree_size)
 
     utils.setDatacenterCost(datacenter, paas_cost_per_sec, paas_cost_per_mem, paas_cost_per_storage, paas_cost_per_bw)
 
-    val vmList = utils.createNwVmList(paas_vm_count, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, utils.SchedulerType.SPACESHARED)
+    val vmList = utils.createNwVmList(paas_vm_count, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, paasCloudletSchedulingType)
     vmList.asScala.foreach(vm => {
-      utils.createHorizontalVmScaling(vm, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, utils.SchedulerType.SPACESHARED, paas_cpu_overload_threshold)
+      utils.createHorizontalVmScaling(vm, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, paasCloudletSchedulingType, paas_cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, paas_ram_scaling_factor, paas_ram_upper_utilization_threshold, paas_ram_lower_utilization_threshold)
     })
 
@@ -276,17 +276,17 @@ object CustomDatacenterService {
     utils.buildTableAndPrintResults(broker, vmList, hostList)
 
   def requestThreeTierPaaSService(simulation: CloudSim, broker: DatacenterBroker, numberOfAppCloudlets: Int, cloudletLength: Int, cloudletPe: Int): Unit =
-    val hostList = utils.createNwHostList(paas_hosts_count, paas_host_pe_count, paas_host_mips, paas_host_ram, paas_host_bw, paas_host_storage, utils.SchedulerType.TIMESHARED)
+    val hostList = utils.createNwHostList(paas_hosts_count, paas_host_pe_count, paas_host_mips, paas_host_ram, paas_host_bw, paas_host_storage, paasVmSchedulingType)
 
     val allocationPolicy = utils.getAllocationPolicy(paasAllocationPolicyType)
     // We will be using Ring network datacenter for PAAS Simulations
-    val datacenter = RingNetworkDatacenter(simulation, hostList, allocationPolicy)
+    val datacenter = utils.createNwDatacenter(utils.NetworkDatacenterType.RING, simulation, hostList, allocationPolicy, paas_tree_size)
 
     utils.setDatacenterCost(datacenter, paas_cost_per_sec, paas_cost_per_mem, paas_cost_per_storage, paas_cost_per_bw)
 
-    val vmList = utils.createNwVmList(paas_vm_count, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, utils.SchedulerType.SPACESHARED)
+    val vmList = utils.createNwVmList(paas_vm_count, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, paasCloudletSchedulingType)
     vmList.asScala.foreach(vm => {
-      utils.createHorizontalVmScaling(vm, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, utils.SchedulerType.SPACESHARED, paas_cpu_overload_threshold)
+      utils.createHorizontalVmScaling(vm, paas_host_mips, paas_vm_pe_count, paas_vm_ram, paas_vm_bw, paas_vm_size, paasCloudletSchedulingType, paas_cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, paas_ram_scaling_factor, paas_ram_upper_utilization_threshold, paas_ram_lower_utilization_threshold)
     })
 
@@ -308,12 +308,12 @@ object CustomDatacenterService {
       iaas_host_ram,
       iaas_host_bw,
       iaas_host_storage,
-      utils.SchedulerType.TIMESHARED
+      iaasVmSchedulingType
     )
 
     val allocationPolicy = utils.getAllocationPolicy(iaasAllocationPolicyType)
     // We will be using ring network datacenter for IAAS Simulations
-    val datacenter = RingNetworkDatacenter(simulation, hostList, allocationPolicy)
+    val datacenter = utils.createNwDatacenter(utils.NetworkDatacenterType.RING, simulation, hostList, allocationPolicy, paas_tree_size)
 
     utils.setDatacenterCost(datacenter,
       iaas_cost_per_sec,
@@ -329,7 +329,7 @@ object CustomDatacenterService {
       iaas_vm_ram,
       iaas_vm_bw,
       iaas_vm_size,
-      utils.SchedulerType.SPACESHARED
+      iaasCloudletSchedulingType
     )
 
     // set scaling if user needs to
@@ -342,7 +342,7 @@ object CustomDatacenterService {
           iaas_vm_ram,
           iaas_vm_bw,
           iaas_vm_size,
-          utils.SchedulerType.SPACESHARED,
+          iaasCloudletSchedulingType,
           cpuOverloadThreshold
         )
         utils.createVerticalRamScalingForVm(
@@ -421,17 +421,17 @@ object CustomDatacenterService {
     else if cloudletOutputSize > faas_max_cloudlet_output_file_size then
       logger.error(s"Cloudlet output file size cannot be larger than $faas_max_cloudlet_output_file_size in FaaS model")
     else
-      val hostList = utils.createNwHostList(faas_hosts_count, faas_host_pe_count, faas_host_mips, faas_host_ram, faas_host_bw, faas_host_storage, utils.SchedulerType.TIMESHARED)
+      val hostList = utils.createNwHostList(faas_hosts_count, faas_host_pe_count, faas_host_mips, faas_host_ram, faas_host_bw, faas_host_storage, faasVmSchedulingType)
 
       val allocationPolicy = utils.getAllocationPolicy(faasAllocationPolicyType)
       // We will be using hybrid network datacenter for faas Simulations
-      val datacenter = HybridNetworkDatacenter(simulation, hostList, allocationPolicy)
+      val datacenter = utils.createNwDatacenter(utils.NetworkDatacenterType.HYBRID, simulation, hostList, allocationPolicy, paas_tree_size)
 
       utils.setDatacenterCost(datacenter, faas_cost_per_sec, faas_cost_per_mem, faas_cost_per_storage, faas_cost_per_bw)
 
-      val vmList = utils.createNwVmList(faas_vm_count, faas_host_mips, faas_vm_pe_count, faas_vm_ram, faas_vm_bw, faas_vm_size, utils.SchedulerType.SPACESHARED)
+      val vmList = utils.createNwVmList(faas_vm_count, faas_host_mips, faas_vm_pe_count, faas_vm_ram, faas_vm_bw, faas_vm_size, faasCloudletSchedulingType)
       vmList.asScala.foreach(vm => {
-        utils.createHorizontalVmScaling(vm, faas_host_mips, faas_vm_pe_count, faas_vm_ram, faas_vm_bw, faas_vm_size, utils.SchedulerType.SPACESHARED, faas_cpu_overload_threshold)
+        utils.createHorizontalVmScaling(vm, faas_host_mips, faas_vm_pe_count, faas_vm_ram, faas_vm_bw, faas_vm_size, faasCloudletSchedulingType, faas_cpu_overload_threshold)
         utils.createVerticalRamScalingForVm(vm, faas_ram_scaling_factor, faas_ram_upper_utilization_threshold, faas_ram_lower_utilization_threshold)
       })
 

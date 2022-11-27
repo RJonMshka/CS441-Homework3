@@ -90,6 +90,13 @@ object MultiDatacenterNetworkTopologySimulation {
   val ram_upper_utilization_threshold = 0.8
   val ram_lower_utilization_threshold = 0.3
 
+  // datacenter allocation Policy
+  val allocationPolicyType = "BESTFIT"
+  // vm scheduling policy
+  val vmSchedulerType = "TIMESHARED"
+  // cloudlet scheduling policy
+  val cloudletSchedulerType = "SPACESHARED"
+
   def main(args: Array[String]): Unit = {
 
     // creating simulation object
@@ -98,35 +105,35 @@ object MultiDatacenterNetworkTopologySimulation {
     val broker = TopologyAwareBrokerBestFit(simulation)
 
     // creating host list for each datacenter
-    val hostList1 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    val hostList2 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    val hostList3 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    val hostList4 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
-    val hostList5 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, utils.SchedulerType.TIMESHARED)
+    val hostList1 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
+    val hostList2 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
+    val hostList3 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
+    val hostList4 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
+    val hostList5 = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
 
     // setting up datacenters
-    val datacenter1 = StarNetworkDatacenter(simulation, hostList1, VmAllocationPolicyBestFit())
+    val datacenter1 = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList1, utils.getAllocationPolicy(allocationPolicyType), tree_count)
     utils.setDatacenterCost(datacenter1, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
-    val datacenter2 = RingNetworkDatacenter(simulation, hostList2, VmAllocationPolicyBestFit())
+    val datacenter2 = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList2, utils.getAllocationPolicy(allocationPolicyType), tree_count)
     utils.setDatacenterCost(datacenter2, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
-    val datacenter3 = BusNetworkDatacenter(simulation, hostList3, VmAllocationPolicyBestFit())
+    val datacenter3 = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList3, utils.getAllocationPolicy(allocationPolicyType), tree_count)
     utils.setDatacenterCost(datacenter3, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
-    val datacenter4 = TreeNetworkDatacenter(simulation, hostList4, VmAllocationPolicyBestFit(), tree_count)
+    val datacenter4 = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList4, utils.getAllocationPolicy(allocationPolicyType), tree_count)
     utils.setDatacenterCost(datacenter4, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
-    val datacenter5 = HybridNetworkDatacenter(simulation, hostList5, VmAllocationPolicyBestFit())
+    val datacenter5 = utils.createNwDatacenter(utils.NetworkDatacenterType.STAR, simulation, hostList5, utils.getAllocationPolicy(allocationPolicyType), tree_count)
     utils.setDatacenterCost(datacenter5, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
     // configure inter-datacenter network topology
     utils.configureNetwork(simulation, datacenter1, datacenter2, datacenter3, datacenter4, datacenter5, broker, connection_latency, connection_bw, connection_latency, connection_bw)
 
     // creating VMs and applying auto-scaling parameters are well
-    val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.SPACESHARED)
+    val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, cloudletSchedulerType)
     vmList.asScala.foreach(vm => {
-      utils.createHorizontalVmScaling(vm, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, utils.SchedulerType.SPACESHARED, cpu_overload_threshold)
+      utils.createHorizontalVmScaling(vm, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, cloudletSchedulerType, cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, ram_scaling_factor, ram_upper_utilization_threshold, ram_lower_utilization_threshold)
     })
 
