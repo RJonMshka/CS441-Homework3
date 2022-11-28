@@ -46,6 +46,9 @@ All of these tasks are described in the later sections of this documentation.
 2. command is `docker -t build img-name:tagname`
 3. Push it to docker repo by using command `docker tag image_name:tagname docker_username/repo_name:tagname'.
 4. And then `docker push docker_username/docker_repo_name:tagname`.
+---
+
+### Docker Image Link: [DOCKER IMAGE](https://hub.docker.com/layers/rkumar40/cs441-docker-repo/v1/images/sha256-fbf1a6344a32b52a337173a4c03bfc2c276125397d139619913622a30e0d91c0?context=explore)
 
 ---
 ### Applications
