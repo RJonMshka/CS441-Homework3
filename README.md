@@ -1,5 +1,5 @@
 # CS-441 Cloud Computing Objects
-## Homework 2 Documentation
+## Homework 3 Documentation
 ## By: Rajat Kumar (UIN: 653922910)
 
 ## Cloud Organization Simulations using CloudSimPlus and Scala
