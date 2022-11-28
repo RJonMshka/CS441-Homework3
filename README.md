@@ -15,6 +15,7 @@ All of these tasks are described in the later sections of this documentation.
 
 
 ## How to run the application
+
 1. Download IntelliJ or your favourite IDE. The application is developed using IntelliJ IDE, and it is highly recommended to use it for various reasons.
 2. Make sure you have Java SDK version 18 installed on your machine.
 3. Also, it is assumed that your machine have git (version control) installed on your machine. If not, please do.
@@ -41,8 +42,12 @@ All of these tasks are described in the later sections of this documentation.
 ---
 
 ### Docker Deployment
+1. There is one `Dockerfile` created in root repository. Create an image out of it using docker.
+2. command is `docker -t build img-name:tagname`
+3. Push it to docker repo by using command `docker tag image_name:tagname docker_username/repo_name:tagname'.
+4. And then `docker push docker_username/docker_repo_name:tagname`.
 
-
+---
 ### Applications
 Three types of applications (cloudlets) exists in the simulations.
 1. Simple Cloudlet - Various simulation have done with simple cloudlet with different attributes and utilization models. This application represent a single task application.
