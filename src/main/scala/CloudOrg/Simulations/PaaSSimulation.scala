@@ -20,14 +20,17 @@ object PaaSSimulation {
   val threeTierAppPeConsumption = paasSimConfig.getInt("threeTierAppPeConsumption")
 
 
-  // Three Tier PaaS inputs
-
+  /**
+   * PAAS Cloud Customer simulation for MapReduce Platform
+   */
   def mapReducePaaSSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)
     CustomDatacenterService.requestMapReducePaaSSimulation(simulation, broker, mapReduceJobs, jobLength, mapReduceJobPeConsumption)
 
-
+  /**
+   * PAAS Cloud Customer simulation for Three Tier App Platform
+   */
   def threeTierPaaSSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)

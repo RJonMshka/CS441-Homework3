@@ -3,7 +3,7 @@ package CloudOrg
 import CloudOrg.HelperUtils.CreateLogger
 import CloudOrg.Simulations.{BasicSimulation, FaaSSimulation, IaaSSimulation, MultiDatacenterNetworkTopologySimulation, PaaSSimulation, SaaSSimulation}
 import CloudOrg.Simulations.HybridTopologySimulations.HybridTopologySimpleCloudletSimulation
-import CloudOrg.Simulations.RingTopologySimulations.RingTopologyThreeTierAppSimulation
+import CloudOrg.Simulations.RingTopologySimulations.{RingTopologyMapReduceAppSimulation, RingTopologyThreeTierAppSimulation}
 import CloudOrg.Simulations.TreeTopologySimulations.TreeTopologyMapReduceSimulation
 
 object RunSimulations {
@@ -17,10 +17,6 @@ object RunSimulations {
     logger.info("starting hybrid simple cloudlet simulation")
     HybridTopologySimpleCloudletSimulation.startSimulation()
     logger.info("hybrid simple cloudlet ended")
-
-    logger.info("starting tree map reduce simulation")
-    TreeTopologyMapReduceSimulation.startSimulation()
-    logger.info("tree map reduce simulation ended")
 
     logger.info("starting ring three tier simulation")
     RingTopologyThreeTierAppSimulation.startSimulation()

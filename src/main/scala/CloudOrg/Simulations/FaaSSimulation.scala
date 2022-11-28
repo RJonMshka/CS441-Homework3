@@ -15,6 +15,9 @@ object FaaSSimulation {
   val faasCloudletSize = faasSimConfig.getInt("faasCloudletSize")
   val faasCloudletOutputSize = faasSimConfig.getInt("faasCloudletOutputSize")
 
+  /**
+   * FAAS Cloud Customer simulation
+   */
   def faaSSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)

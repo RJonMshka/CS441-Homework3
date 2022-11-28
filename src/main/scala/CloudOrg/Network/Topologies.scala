@@ -1,6 +1,7 @@
 package CloudOrg.Network
 
 import CloudOrg.HelperUtils.ObtainConfigReference
+import com.typesafe.config.Config
 import org.cloudbus.cloudsim.core.CloudSim
 import org.cloudbus.cloudsim.datacenters.network.NetworkDatacenter
 import org.cloudbus.cloudsim.hosts.network.NetworkHost
@@ -10,10 +11,11 @@ import java.util
 import scala.jdk.CollectionConverters.*
 
 object Topologies {
+  // config
+  val config: Config = ObtainConfigReference("cloudOrganizationSimulations").get
+  val networkConfig: Config = config.getConfig("cloudOrganizationSimulations.network")
 
-  val config = ObtainConfigReference("cloudOrganizationSimulations").get
-  val networkConfig = config.getConfig("cloudOrganizationSimulations.network")
-
+  // switch specific variables
   private val edge_switch_bw_down = networkConfig.getDouble("edge_switch_bw_down")
   private val edge_switch_bw_up = networkConfig.getDouble("edge_switch_bw_up")
   private val edge_switch_switching_delay = networkConfig.getDouble("edge_switch_switching_delay")
@@ -26,6 +28,7 @@ object Topologies {
   private val root_switch_bw_up = networkConfig.getDouble("root_switch_bw_up")
   private val root_switch_switching_delay = networkConfig.getDouble("root_switch_switching_delay")
 
+  // This method is used to create edge switch
   private def setEdgeSwitch(simulation: CloudSim, datacenter: NetworkDatacenter): EdgeSwitch =
     val edgeSwitch = EdgeSwitch(simulation, datacenter)
     edgeSwitch.setDownlinkBandwidth(edge_switch_bw_down)
@@ -34,6 +37,7 @@ object Topologies {
     datacenter.addSwitch(edgeSwitch)
     edgeSwitch
 
+  // This method is used to create aggregate switch
   private def setAggregateSwitch(simulation: CloudSim, datacenter: NetworkDatacenter): AggregateSwitch =
     val aggregateSwitch = AggregateSwitch(simulation, datacenter)
     aggregateSwitch.setDownlinkBandwidth(aggregate_switch_bw_down)
@@ -42,6 +46,7 @@ object Topologies {
     datacenter.addSwitch(aggregateSwitch)
     aggregateSwitch
 
+  // This method is used to create root switch
   private def setRootSwitch(simulation: CloudSim, datacenter: NetworkDatacenter): RootSwitch =
     val rootSwitch = RootSwitch(simulation, datacenter)
     rootSwitch.setDownlinkBandwidth(root_switch_bw_down)
@@ -50,6 +55,7 @@ object Topologies {
     datacenter.addSwitch(rootSwitch)
     rootSwitch
 
+  // This method creates star topology for a datacenter
   def createStarNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
     // creating one root switch and one aggregate switch
     val rootSwitch = setRootSwitch(simulation, datacenter)
@@ -69,20 +75,13 @@ object Topologies {
     })
     ()
 
+  // This method creates ring topology for a datacenter
   def createRingNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
     val rootSwitch = setRootSwitch(simulation, datacenter)
     val edgeSwitchList = hostList.asScala.map(host => {
       val edgeSwitch = setEdgeSwitch(simulation, datacenter)
       edgeSwitch.connectHost(host)
       edgeSwitch
-    }).toList
-    val aggregateSwitchList = edgeSwitchList.map(_ => {
-      val aggregateSwitch = setAggregateSwitch(simulation, datacenter)
-      // can only be connected to 2 edge switches
-      aggregateSwitch.setPorts(2)
-      rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
-      aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-      aggregateSwitch
     }).toList
     // connect in ring fashion
     if(edgeSwitchList.length > 1) {
@@ -104,20 +103,21 @@ object Topologies {
       aggregateSwitch.setPorts(2)
       rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
       aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-      edgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-      edgeSwitchList(edgeSwitchList.length - 1).getUplinkSwitches.add(aggregateSwitch)
-      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList(0))
-      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList(edgeSwitchList.length - 1))
+      edgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+      edgeSwitchList.last.getUplinkSwitches.add(aggregateSwitch)
+      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList.head)
+      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList.last)
     } else if(edgeSwitchList.length == 1) {
       // edge case
       val aggregateSwitch = setAggregateSwitch(simulation, datacenter)
       rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
       aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-      edgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList(0))
+      edgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList.head)
     }
     ()
 
+  // This method creates bus topology for a datacenter
   def createBusNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost]): Unit =
     // similar to ring just that last and first are not connected
     val rootSwitch = setRootSwitch(simulation, datacenter)
@@ -144,14 +144,15 @@ object Topologies {
       val aggregateSwitch = setAggregateSwitch(simulation, datacenter)
       rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
       aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-      edgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList(0))
+      edgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+      aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList.head)
     }
     ()
 
+  // This method creates tree topology for a datacenter
   def createTreeNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter, hostList: util.List[? <: NetworkHost], treeSize: Int): Unit =
   // fallback to star network
-    if(hostList.size % treeSize != 0) then
+    if hostList.size % treeSize != 0 then
       createStarNetworkTopologyInDatacenter(simulation, datacenter, hostList)
     else
       val rootSwitch = setRootSwitch(simulation, datacenter)
@@ -166,7 +167,7 @@ object Topologies {
           edgeSwitch.connectHost(host)
         })
         edgeSwitch
-      }).toList
+      })
       // total aggregate switches will be one less than edge switches
       if(edgeSwitchList.length > 1) {
         Range(0, edgeSwitchList.length - 1).foreach(i => {
@@ -185,11 +186,12 @@ object Topologies {
         val aggregateSwitch = setAggregateSwitch(simulation, datacenter)
         rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
         aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-        edgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-        aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList(0))
+        edgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+        aggregateSwitch.getDownlinkSwitches.add(edgeSwitchList.head)
       }
       ()
 
+  // This method creates hybrid topology for a datacenter
   def createHybridNetworkTopologyInDatacenter(simulation: CloudSim, datacenter: NetworkDatacenter,hostList: util.List[? <: NetworkHost]): Unit =
     // in hybrid we will divide all hosts in 3 set and try different network for them and connect them together by having all of their aggregate switches talking to root switch
     val rootSwitch = setRootSwitch(simulation, datacenter)
@@ -252,17 +254,17 @@ object Topologies {
         aggregateSwitch.setPorts(2)
         rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
         aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-        thirdNwEdgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-        thirdNwEdgeSwitchList(thirdNwEdgeSwitchList.length - 1).getUplinkSwitches.add(aggregateSwitch)
-        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList(0))
-        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList(thirdNwEdgeSwitchList.length - 1))
+        thirdNwEdgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+        thirdNwEdgeSwitchList.last.getUplinkSwitches.add(aggregateSwitch)
+        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList.head)
+        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList.last)
       } else if(thirdNwEdgeSwitchList.length == 1) {
         // edge case
         val aggregateSwitch = setAggregateSwitch(simulation, datacenter)
         rootSwitch.getDownlinkSwitches.add(aggregateSwitch)
         aggregateSwitch.getUplinkSwitches.add(rootSwitch)
-        thirdNwEdgeSwitchList(0).getUplinkSwitches.add(aggregateSwitch)
-        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList(0))
+        thirdNwEdgeSwitchList.head.getUplinkSwitches.add(aggregateSwitch)
+        aggregateSwitch.getDownlinkSwitches.add(thirdNwEdgeSwitchList.head)
       }
     }
     ()

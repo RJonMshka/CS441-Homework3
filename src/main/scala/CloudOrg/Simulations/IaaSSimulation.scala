@@ -39,6 +39,9 @@ object IaaSSimulation {
   val simpleRamUpperThreshold = iaasSimConfig.getDouble("simpleRamUpperThreshold")
   val simpleRamLowerThreshold = iaasSimConfig.getDouble("simpleRamLowerThreshold")
 
+  /**
+   * IAAS Cloud Customer simulation for running MapReduce application
+   */
   def iaaSMapReduceAppSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)
@@ -56,7 +59,9 @@ object IaaSSimulation {
       mapReduceRamLowerThreshold
     )
 
-
+  /**
+   * IAAS Cloud Customer simulation for running Three Tier application
+   */
   def iaaSThreeTierAppSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)
@@ -74,6 +79,9 @@ object IaaSSimulation {
       threeTierRamLowerThreshold
     )
 
+  /**
+   * IAAS Cloud Customer simulation for running simple application
+   */
   def iaaSSimpleAppSimulation(): Unit =
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)

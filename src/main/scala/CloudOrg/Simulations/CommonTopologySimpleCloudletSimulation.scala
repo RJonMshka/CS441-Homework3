@@ -65,17 +65,25 @@ object CommonTopologySimpleCloudletSimulation {
   // cloudlet scheduling policy
   val cloudletSchedulerType = simpleConfig.getString("cloudletSchedulerType")
 
+  /**
+   * This method starts the simulation
+   * @param datacenterType - type of datacenter to be created for simulation
+   */
   def startSimulation(datacenterType: utils.NetworkDatacenterType): Unit =
+    logger.info("SIMPLE CLOUDLET SIMULATIONS")
     val simulation: CloudSim = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)
     val hostList = utils.createNwHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)
 
+    // allocation policy
     val allocationPolicy = utils.getAllocationPolicy(allocationPolicyType)
 
     val datacenter = utils.createNwDatacenter(datacenterType, simulation, hostList, allocationPolicy, tree_count)
     utils.setDatacenterCost(datacenter, cost_per_sec, cost_per_mem, cost_per_storage, cost_per_bw)
 
     val vmList = utils.createNwVmList(vm_count, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, cloudletSchedulerType)
+
+    // Set Auto scaling
     vmList.asScala.foreach(vm => {
       utils.createHorizontalVmScaling(vm, host_mips, vm_pe_count, vm_ram, vm_bw, vm_size, cloudletSchedulerType, cpu_overload_threshold)
       utils.createVerticalRamScalingForVm(vm, ram_scaling_factor, ram_upper_utilization_threshold, ram_lower_utilization_threshold)

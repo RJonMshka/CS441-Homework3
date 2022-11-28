@@ -13,6 +13,9 @@ object SaaSSimulation {
   // can be type 1, type 2 or type 3
   val taskToPerform = CustomDatacenterService.SaaSCloudletType.Type1
 
+  /**
+   * SAAS Cloud Customer simulation
+   */
   def startSaaSSimulation(): Unit = {
     val simulation = CloudSim()
     val broker = DatacenterBrokerSimple(simulation)

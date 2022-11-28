@@ -35,6 +35,7 @@ object BasicSimulation {
   val vmSchedulerType = basicSimConfig.getString("vmSchedulerType")
 
   def startSimulation(): Unit = {
+    logger.info("BASIC EXAMPLE SIMULATION")
     val simulation:CloudSim = CloudSim()
     val broker: DatacenterBroker = utils.createBroker(simulation)
     val hostList = utils.createHostList(hosts_count, host_pe_count, host_mips, host_ram, host_bw, host_storage, vmSchedulerType)

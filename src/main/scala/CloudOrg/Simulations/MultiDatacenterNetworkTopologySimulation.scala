@@ -97,8 +97,11 @@ object MultiDatacenterNetworkTopologySimulation {
   // cloudlet scheduling policy
   val cloudletSchedulerType = multiDCSimConfig.getString("cloudletSchedulerType")
 
+  /**
+   * This method starts the simulation
+   */
   def startSimulation(): Unit = {
-
+    logger.info("MULTI DATACENTER CLOUD ORGANIZATION SIMULATION")
     // creating simulation object
     val simulation: CloudSim = CloudSim()
     // broker object representing cloud customer
